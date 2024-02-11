@@ -209,7 +209,7 @@
                                 <li>Credit Note</li>
                                 <li>Sales Settlement Note</li>
                                 <li>Customer Order Note</li>
-                            </ul> 
+                            </ul>
                         </div>
                     </div>
 
@@ -227,7 +227,7 @@
                                 <li>Debit Note</li>
                                 <li>Purchase Settlement Note</li>
                                 <li>Purchase Order Note</li>
-                            </ul> 
+                            </ul>
                         </div>
                     </div>
 
@@ -253,15 +253,15 @@
             <br>
 
             <div class="row">
-                
+
                 <div class="col-sm-4">
 
                     <div class="card bg-light mb-3" style="max-width: 18rem;">
-                        
+
                         <div class="card-header"> <a href="{{route('genaral_ledger')}}"> Genaral Ledger </a> </div>
                         <div class="card-body">
                             <ul>
-                                <li> <a href="{{route('journal_entry')}}"> Journal Entry </a> </li>
+                                <li> Journal Entry</li>
                                 <li>Petty Cash Note</li>
                                 <li>Bank Reconsilation</li>
                             </ul>
@@ -269,7 +269,7 @@
                     </div>
 
                 </div>
-                
+
 
                 <div class="col-sm-4">
 
@@ -347,7 +347,7 @@
 
     </div>
 
-       
+
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>

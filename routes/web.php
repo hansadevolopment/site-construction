@@ -13,144 +13,163 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-/*
-|--------------------------------------------------------------------------
-| Admin Routes
-|--------------------------------------------------------------------------
-*/
-use App\Http\Controllers\Admin\AdminstrativeController;
+use App\Http\Controllers\SiteMM\Master\SiteController;
+use App\Http\Controllers\SiteMM\Master\ItemController;
+use App\Http\Controllers\SiteMM\Master\LabourCategoryController;
+use App\Http\Controllers\SiteMM\Master\EmployeeController;
+use App\Http\Controllers\SiteMM\Master\OverheadCostController;
+use App\Http\Controllers\SiteMM\Master\UnitController;
+use App\Http\Controllers\SiteMM\Master\CostSectionController;
 
-/*
-|--------------------------------------------------------------------------
-| Genaral Ledger Routes
-|--------------------------------------------------------------------------
-*/
-use App\Http\Controllers\GenaralLedger\Transaction\JournalEntryController;
+use App\Http\Controllers\SiteMM\SiteForcast\SiteTaskController;
+use App\Http\Controllers\SiteMM\SiteForcast\SiteSubTaskController;
+use App\Http\Controllers\SiteMM\SiteForcast\SiteMaterialsController;
+use App\Http\Controllers\SiteMM\SiteForcast\SiteLabourController;
+use App\Http\Controllers\SiteMM\SiteForcast\SiteOverheadCostController;
+use App\Http\Controllers\SiteMM\SiteForcast\SiteProfitController;
 
-/*
-|--------------------------------------------------------------------------
-| Inventory Routes
-|--------------------------------------------------------------------------
-*/
-use App\Http\Controllers\Inventory\Primary\ItemMasterController;
-use App\Http\Controllers\Inventory\Primary\ManufactureLocationController;
-use App\Http\Controllers\Inventory\Primary\BrandController;
-use App\Http\Controllers\Inventory\Primary\UnitController;
+use App\Http\Controllers\SiteMM\SiteOperation\ItemIssueNoteController;
+use App\Http\Controllers\SiteMM\SiteOperation\PaymentVoucherController;
+use App\Http\Controllers\SiteMM\SiteOperation\EmployeeAdvanceController;
+use App\Http\Controllers\SiteMM\SiteOperation\EmployeeSalaryController;
+use App\Http\Controllers\SiteMM\SiteOperation\EmployeeSalaryTwoController;
+use App\Http\Controllers\SiteMM\SiteOperation\EmployeeAttendanceOverTimeController;
+use App\Http\Controllers\SiteMM\SiteOperation\DailyProgressReportController;
 
-use App\Http\Controllers\Inventory\Transaction\ItemRequestNoteController;
-use App\Http\Controllers\Inventory\Transaction\ItemIssueNoteController;
-use App\Http\Controllers\Inventory\Transaction\ProductionNoteController;
-use App\Http\Controllers\Inventory\Transaction\StockAdjustmentNoteController;
+use App\Http\Controllers\SiteMM\InquiryList\MasterInquiryController;
+use App\Http\Controllers\SiteMM\InquiryList\SiteTaskSubTaskController;
+use App\Http\Controllers\SiteMM\InquiryList\SapInquiryController;
+use App\Http\Controllers\SiteMM\InquiryList\SoInquiryController;
 
-/*
-|--------------------------------------------------------------------------
-| Sales Routes
-|--------------------------------------------------------------------------
-*/
-use App\Http\Controllers\Sales\Primary\DebtorController;
-use App\Http\Controllers\Sales\Primary\SalesCategoryController;
-use App\Http\Controllers\Sales\Primary\SalesLocationController;
-use App\Http\Controllers\Sales\Primary\SalesRepController;
-
-/*
-|--------------------------------------------------------------------------
-| Purchase Routes
-|--------------------------------------------------------------------------
-*/
-use App\Http\Controllers\Purchase\Primary\CreditorController;
-use App\Http\Controllers\Purchase\Primary\PurchasingCategoryController;
-use App\Http\Controllers\Purchase\Primary\PurchasingLocationController;
-
-use App\Http\Controllers\Purchase\Transaction\GoodReceiveNoteController;
-
+use App\Http\Controllers\SiteMM\Report\SapReportController;
+use App\Http\Controllers\SiteMM\Report\SiteOperationReportController;
 
 
 Route::get('/', function () {
+
     return view('welcome');
 });
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+
+    return view('SiteMM.site_dashboard');
 })->middleware(['auth'])->name('dashboard');
 
-Route::get('/genaral_ledger', [AdminstrativeController::class, 'genaralLedger'])->name('genaral_ledger');
-Route::get('/sales_dashboard', [AdminstrativeController::class, 'getSalesDashboard'])->name('sales_dashboard');
-Route::get('/purchasing_dashboard', [AdminstrativeController::class, 'getPurchasingDashboard'])->name('purchasing_dashboard');
-Route::get('/inventory_dashboard', [AdminstrativeController::class, 'getInventoryDashboard'])->name('inventory_dashboard');
 
 require __DIR__.'/auth.php';
 
 /*
 |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| Sales Routes
+| Site Monitoring Module Routes
 |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 */
-Route::get('/debtor', [DebtorController::class, 'loadView'])->name('debtor');
-Route::post('/debtor_process', [DebtorController::class, 'debtorProcess'])->name('debtor_process');
 
-Route::get('/sales_category', [SalesCategoryController::class, 'loadView'])->name('sales_category');
-Route::post('/sales_category_process', [SalesCategoryController::class, 'salesCategoryProcess'])->name('sales_category_process');
+/*------------------------------------------------------------- Site Master -------------------------------------------------------------*/
 
-Route::get('/sales_location', [SalesLocationController::class, 'loadView'])->name('sales_location');
-Route::post('/sales_location_process', [SalesLocationController::class, 'salesLocationProcess'])->name('sales_location_process');
+Route::get('/site', [SiteController::class, 'loadView'])->name('site');
+Route::post('/site_process', [SiteController::class, 'processSite'])->name('site_process');
+Route::get('/get_site_wise_task', [SiteController::class, 'getSiteWiseTask'])->name('get_site_wise_task');
+Route::post('/open_site', [SiteController::class, 'openSite'])->name('open_site');
+Route::get('/site_excel', [SiteController::class, 'getExcel'])->name('site_excel');
 
-Route::get('/sales_rep', [SalesRepController::class, 'loadView'])->name('sales_rep');
-Route::post('/sales_rep_process', [SalesRepController::class, 'salesRepProcess'])->name('sales_rep_process');
+Route::get('/item', [ItemController::class, 'loadView'])->name('item');
+Route::post('/item_process', [ItemController::class, 'processItem'])->name('item_process');
+Route::get('/get_item_for_sap_material', [ItemController::class, 'getItemForSapMaterial'])->name('get_item_for_sap_material');
+Route::post('/open_item', [ItemController::class, 'openItem'])->name('open_item');
 
+Route::get('/labour_category', [LabourCategoryController::class, 'loadView'])->name('labour_category');
+Route::post('/labour_category_process', [LabourCategoryController::class, 'procesLlabourCategory'])->name('labour_category_process');
+Route::get('/get_labour_category_for_sap_labour', [LabourCategoryController::class, 'getLabourCategoryForSapLabour'])->name('get_labour_category_for_sap_labour');
+Route::post('/open_labour_category', [LabourCategoryController::class, 'openLabourCategory'])->name('open_labour_category');
 
+Route::get('/employee', [EmployeeController::class, 'loadView'])->name('employee');
+Route::post('/employee_process', [EmployeeController::class, 'processEmployee'])->name('employee_process');
+Route::get('/get_employee', [EmployeeController::class, 'getEmployee'])->name('get_employee');
+Route::post('/open_employee', [EmployeeController::class, 'openEmployee'])->name('open_employee');
 
-/*
-|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| Purchase Routes
-|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-*/
-Route::get('/creditor', [CreditorController::class, 'loadView'])->name('creditor');
-Route::post('/creditor_process', [CreditorController::class, 'creditorProcess'])->name('creditor_process');
-
-Route::get('/purchase_category', [PurchasingCategoryController::class, 'loadView'])->name('purchase_category');
-Route::post('/purchase_category_process', [PurchasingCategoryController::class, 'purchasingCategoryProcess'])->name('purchase_category_process');
-
-Route::get('/purchase_location', [PurchasingLocationController::class, 'loadView'])->name('purchase_location');
-Route::post('/purchase_location_process', [PurchasingLocationController::class, 'purchasingLocationProcess'])->name('purchase_location_process');
-
-Route::get('/grn', [GoodReceiveNoteController::class, 'loadView'])->name('grn');
-Route::post('/grn_process', [GoodReceiveNoteController::class, 'grnProcess'])->name('grn_process');
-
-
-/*
-|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| Genaral Ledger Routes
-|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-*/
-Route::get('/journal_entry', [JournalEntryController::class, 'getJournalEntry'])->name('journal_entry');
-Route::post('/journal_entry_process', [JournalEntryController::class, 'journalEntryProcess'])->name('journal_entry_process');
-
-
-/*
-|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| Inventory Routes
-|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-*/
-Route::get('/item_master', [ItemMasterController::class, 'loadView'])->name('item_master');
-Route::post('/item_master_process', [ItemMasterController::class, 'itemMasterProcess'])->name('item_master_process');
-
-Route::get('/manufacture_location', [ManufactureLocationController::class, 'loadView'])->name('manufacture_location');
-Route::post('/manufacture_location_process', [ManufactureLocationController::class, 'manufactureLocationProcess'])->name('manufacture_location_process');
-
-Route::get('/brand', [BrandController::class, 'loadView'])->name('brand');
-Route::post('/brand_process', [BrandController::class, 'brandProcess'])->name('brand_process');
+Route::get('/overhead_cost', [OverheadCostController::class, 'loadView'])->name('overhead_cost');
+Route::post('/overhead_cost_process', [OverheadCostController::class, 'processOverheadCost'])->name('overhead_cost_process');
+Route::post('/open_overhead', [OverheadCostController::class, 'openOverhead'])->name('open_overhead');
 
 Route::get('/unit', [UnitController::class, 'loadView'])->name('unit');
-Route::post('/unit_process', [UnitController::class, 'unitProcess'])->name('unit_process');
+Route::post('/unit_process', [UnitController::class, 'processUnit'])->name('unit_process');
+Route::post('/open_unit', [UnitController::class, 'openUnit'])->name('open_unit');
 
-Route::get('/item_request_note/{referance}', [ItemRequestNoteController::class, 'loadView'])->name('item_request_note');
-Route::post('/item_request_note_process', [ItemRequestNoteController::class, 'itemRequestNoteProcess'])->name('item_request_note_process');
+Route::get('/cost_section_item', [CostSectionController::class, 'getCostSectionItem'])->name('cost_section_item');
 
+
+/*------------------------------------------------------------- Site Forcasting -------------------------------------------------------------*/
+
+Route::get('/site_task', [SiteTaskController::class, 'loadView'])->name('site_task');
+Route::post('/site_task_process', [SiteTaskController::class, 'processSiteTask'])->name('site_task_process');
+Route::get('/get_site_wise_sub_task', [SiteTaskController::class, 'getTaskWiseSubTask'])->name('get_site_wise_sub_task');
+Route::post('/open_task', [SiteTaskController::class, 'openTask'])->name('open_task');
+
+Route::get('/site_sub_task', [SiteSubTaskController::class, 'loadView'])->name('site_sub_task');
+Route::post('/site_sub_task_process', [SiteSubTaskController::class, 'processSiteSubTask'])->name('site_sub_task_process');
+Route::post('/open_sub_task', [SiteSubTaskController::class, 'openSubTask'])->name('open_sub_task');
+
+Route::get('/sap_material', [SiteMaterialsController::class, 'loadView'])->name('sap_material');
+Route::post('/sap_material_add_process', [SiteMaterialsController::class, 'addSapMaterial'])->name('sap_material_add_process');
+Route::post('/open_sap_material', [SiteMaterialsController::class, 'openSapMaterial'])->name('open_sap_material');
+
+Route::get('/sap_labour', [SiteLabourController::class, 'loadView'])->name('sap_labour');
+Route::post('/sap_labour_add_process', [SiteLabourController::class, 'addSapLabour'])->name('sap_labour_add_process');
+Route::post('/open_sap_labour', [SiteLabourController::class, 'openSapLabour'])->name('open_sap_labour');
+
+Route::get('/sap_overhead', [SiteOverheadCostController::class, 'loadView'])->name('sap_overhead');
+Route::post('/sap_overhead_add_process', [SiteOverheadCostController::class, 'addSapOverheadcost'])->name('sap_overhead_add_process');
+Route::post('/open_sap_overhead', [SiteOverheadCostController::class, 'openSapOverhead'])->name('open_sap_overhead');
+
+Route::get('/sap_profit', [SiteProfitController::class, 'loadView'])->name('sap_profit');
+Route::post('/sap_profit_add_process', [SiteProfitController::class, 'addSapProfit'])->name('sap_profit_add_process');
+Route::get('/sap_profit_total', [SiteProfitController::class, 'getSiteWiseTotalCost'])->name('sap_profit_total');
+Route::post('/open_sap_profit', [SiteProfitController::class, 'openSapProfit'])->name('open_sap_profit');
+
+/*------------------------------------------------------------- Site Operation -------------------------------------------------------------*/
 Route::get('/item_issue_note', [ItemIssueNoteController::class, 'loadView'])->name('item_issue_note');
-Route::post('/item_issue_note_process', [ItemIssueNoteController::class, 'itemIssueNoteProcess'])->name('item_issue_note_process');
+Route::post('/item_issue_note_process', [ItemIssueNoteController::class, 'processItemIssueNote'])->name('item_issue_note_process');
+Route::post('/open_item_issue_note', [ItemIssueNoteController::class, 'openItemIssueNote'])->name('open_item_issue_note');
 
-Route::get('/production_note', [ProductionNoteController::class, 'loadView'])->name('production_note');
-Route::post('/production_note_process', [ProductionNoteController::class, 'productionNoteProcess'])->name('production_note_process');
+Route::get('/payment_voucher', [PaymentVoucherController::class, 'loadView'])->name('payment_voucher');
+Route::post('/payment_voucher_process', [PaymentVoucherController::class, 'processPaymentVoucher'])->name('payment_voucher_process');
+Route::post('/open_payment_voucher', [PaymentVoucherController::class, 'openPaymentVoucher'])->name('open_payment_voucher');
 
-Route::get('/stock_adjustment_note', [StockAdjustmentNoteController::class, 'loadView'])->name('stock_adjustment_note');
-Route::post('/stock_adjustment_note_process', [StockAdjustmentNoteController::class, 'stockAdjustmentNoteProcess'])->name('stock_adjustment_note_process');
+Route::get('/employee_advance', [EmployeeAdvanceController::class, 'loadView'])->name('employee_advance');
+Route::post('/employee_advance_process', [EmployeeAdvanceController::class, 'processEmployeeAdvance'])->name('employee_advance_process');
+Route::post('/open_employee_advance', [EmployeeAdvanceController::class, 'openEmployeeAdvance'])->name('open_employee_advance');
+Route::get('/get_employee_advance', [EmployeeAdvanceController::class, 'getEmployeeAdvance'])->name('get_employee_advance');
+
+Route::get('/employee_attendance', [EmployeeAttendanceOverTimeController::class, 'loadView'])->name('employee_attendance');
+Route::post('/employee_attendance_process', [EmployeeAttendanceOverTimeController::class, 'processEmployeeAttendanceOvertime'])->name('employee_attendance_process');
+
+Route::get('/employee_salary', [EmployeeSalaryController::class, 'loadView'])->name('employee_salary');
+Route::post('/employee_salary_process', [EmployeeSalaryController::class, 'processEmployeeSalary'])->name('employee_salary_process');
+Route::post('/open_employee_salary', [EmployeeSalaryController::class, 'openEmployeeSalary'])->name('open_employee_salary');
+
+Route::get('/employee_salary_two', [EmployeeSalaryTwoController::class, 'loadView'])->name('employee_salary_two');
+Route::post('/employee_salary_two_process', [EmployeeSalaryTwoController::class, 'processEmployeeSalary'])->name('employee_salary_two_process');
+
+Route::get('/dpr', [DailyProgressReportController::class, 'loadView'])->name('dpr');
+Route::post('/dpr_process', [DailyProgressReportController::class, 'processDPR'])->name('dpr_process');
+Route::post('/open_dpr', [DailyProgressReportController::class, 'openDPR'])->name('open_dpr');
+
+/*------------------------------------------------------------- Inquiry & List -------------------------------------------------------------*/
+Route::get('/master_inquire', [MasterInquiryController::class, 'loadView'])->name('master_inquire');
+Route::post('/master_inquire_process', [MasterInquiryController::class, 'inquireMaster'])->name('master_inquire_process');
+
+Route::get('/site_task_subtask_inquiry', [SiteTaskSubTaskController::class, 'loadView'])->name('site_task_subtask_inquiry');
+Route::post('/site_task_subtask_inquiry_process', [SiteTaskSubTaskController::class, 'processSiteTaskSubTaskInquire'])->name('site_task_subtask_inquiry_process');
+
+Route::get('/sap_inquire', [SapInquiryController::class, 'loadView'])->name('sap_inquire');
+Route::post('/sap_inquire_process', [SapInquiryController::class, 'inquireSiteActionPlan'])->name('sap_inquire_process');
+
+Route::get('/so_inquire', [SoInquiryController::class, 'loadView'])->name('so_inquire');
+Route::post('/so_inquire_process', [SoInquiryController::class, 'getInquireSiteOperationResults'])->name('so_inquire_process');
+
+/*------------------------------------------------------------- Report -------------------------------------------------------------*/
+Route::get('/sap_report', [SapReportController::class, 'loadView'])->name('sap_report');
+Route::post('/sap_report_process', [SapReportController::class, 'sapReport'])->name('sap_report_process');
+
+Route::get('/so_summary_report', [SiteOperationReportController::class, 'loadView'])->name('so_summary_report');
+Route::post('/so_summary_report_process', [SiteOperationReportController::class, 'soReport'])->name('so_summary_report_process');

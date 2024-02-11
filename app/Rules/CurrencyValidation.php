@@ -14,7 +14,6 @@ class CurrencyValidation implements Rule {
         $this->avoid_zero_validation = $para_value;
     }
 
-
     public function passes($attribute, $value){
 
         $currency_value = str_replace(",","",$value);
@@ -41,12 +40,10 @@ class CurrencyValidation implements Rule {
 			$this->message = 'The Amount must be Numeric';
 			return FALSE;
 		}
-    
     }
 
     public function message(){
 
         return $this->message;
     }
-
 }
