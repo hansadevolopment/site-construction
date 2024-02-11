@@ -9,6 +9,7 @@ use App\Helpers\Database\EloquentHelper;
 
 class ItemIssueNoteCancelValidation implements Rule {
 
+    protected $return_message = '';
     protected $transaction_type = '';
 
     public function __construct($type){
@@ -18,33 +19,57 @@ class ItemIssueNoteCancelValidation implements Rule {
 
     public function passes($attribute, $value){
 
-        if( $this->transaction_type == 'New' ){
+        if( $this->transaction_type == 'save' ){
 
-            $result = DB::table('item_issue_note')->where('iin_id', $value)->value('cancel');
-            if( EloquentHelper::recordExists($result) ){
-
-                return FALSE;
-            }else{
+            if( $value == '#Auto#'){
 
                 return TRUE;
-            }
 
-        }else{
+            }else{
 
-            $result = DB::table('item_issue_note')->where('iin_id', $value)->value('cancel');
-            if( EloquentHelper::recordExists($result) ){
+                $result = DB::table('item_issue_note')->where('iin_id', $value)->value('cancel');
+                if( EloquentHelper::recordExists($result) ){
 
-                if($result == TRUE){
+                    if($result == TRUE){
 
-                    return FALSE;
+                        $this->return_message = 'This Item issue note is Cancelled.';
+                        return FALSE;
+                    }else{
+
+                        return TRUE;
+                    }
                 }else{
 
                     return TRUE;
                 }
+            }
+
+        }else{
+
+
+            if( $value == '#Auto#'){
+
+                $this->return_message = 'Invalied Item issue note no.';
+                return FALSE;
 
             }else{
 
-                return TRUE;
+                $result = DB::table('item_issue_note')->where('iin_id', $value)->value('cancel');
+                if( EloquentHelper::recordExists($result) ){
+
+                    if($result == TRUE){
+
+                        $this->return_message = 'This record is already cancelled.';
+                        return FALSE;
+
+                    }else{
+
+                        return TRUE;
+                    }
+                }else{
+
+                    return TRUE;
+                }
             }
 
         }
@@ -52,6 +77,6 @@ class ItemIssueNoteCancelValidation implements Rule {
 
     public function message(){
 
-        return 'This Item issue note is Cancelled.';
+        return  $this->return_message;
     }
 }

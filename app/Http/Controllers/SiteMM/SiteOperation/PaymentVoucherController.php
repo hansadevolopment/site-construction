@@ -87,10 +87,11 @@ class PaymentVoucherController extends Controller {
 
             $attributes['validation_messages'] = $process['validation_messages'];
 
-            if($request->submit == 'Display'){
+            if($request->submit == 'Cancel'){
 
-                $attributes['validation_messages'] = new MessageBag();
-                $attributes['process_message'] = "";
+                $message = $process['front_end_message'] .' <br> ' . $process['back_end_message'];
+                $attributes['process_message'] = '<div class="alert alert-danger" role="alert"> '. $message .' </div> ';
+
             }else{
 
                 $message = $process['front_end_message'] .' <br> ' . $process['back_end_message'];
@@ -201,7 +202,7 @@ class PaymentVoucherController extends Controller {
             $inputs['quantity'] = $request->quantity;
             $inputs['price'] = InputHelper::currencyToNumber($request->price);
 
-            $rules['pv_id'] = array('required', new PaymentVoucherCancelValidation());
+            $rules['pv_id'] = array('required', new PaymentVoucherCancelValidation('save'));
             $rules['pv_date'] = array('required', 'date');
             $rules['site_id'] = array( new ZeroValidation('Site', $request->site_id));
             $rules['task_id'] = array( new ZeroValidation('Task', $request->task_id));
@@ -216,7 +217,7 @@ class PaymentVoucherController extends Controller {
             if($request->submit == 'Cancel'){
 
                 $i['pv_id'] = $request->pv_id;
-                $r['pv_id'] = array('required', new PaymentVoucherCancelValidation());
+                $r['pv_id'] = array('required', new PaymentVoucherCancelValidation('cancel'));
                 $validator = Validator::make($i, $r);
 
             }else{

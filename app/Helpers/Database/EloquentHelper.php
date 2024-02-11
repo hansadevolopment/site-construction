@@ -12,7 +12,7 @@ class EloquentHelper{
         }
 
         $data_type = gettype($result);
-        if( ($data_type == 'int') || ($data_type == 'string') || ($data_type == 'float') || ($data_type == 'boolean')){
+        if( ($data_type == 'integer') || ($data_type == 'string') || ($data_type == 'double') || ($data_type == 'boolean')){
 
             return TRUE;
 

@@ -235,7 +235,7 @@ class DailyProgressReportController extends Controller {
             $inputs['quantity'] = $request->quantity;
             $inputs['remark'] = $request->remark;
 
-            $rules['dpr_id'] = array('required', new DprCancelValidation());
+            $rules['dpr_id'] = array('required', new DprCancelValidation('save'));
             $rules['dpr_date'] = array('required', 'date');
             $rules['cs_id'] = array( new ZeroValidation('Cost Section', $request->cs_id));
             $rules['site_id'] = array( new ZeroValidation('Site', $request->site_id));
@@ -255,7 +255,7 @@ class DailyProgressReportController extends Controller {
             if($request->submit == 'Cancel'){
 
                 $i['dpr_id'] = $request->dpr_id;
-                $r['dpr_id'] = array('required', new DprCancelValidation());
+                $r['dpr_id'] = array('required', new DprCancelValidation('cancel'));
 
                 $validator = Validator::make($i, $r);
 

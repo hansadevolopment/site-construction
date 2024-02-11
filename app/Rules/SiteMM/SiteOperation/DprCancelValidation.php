@@ -9,24 +9,74 @@ use App\Helpers\Database\EloquentHelper;
 
 class DprCancelValidation implements Rule {
 
-    public function __construct() {
+    protected $return_message = '';
+    protected $transaction_type = '';
 
+    public function __construct($type){
+
+        $this->transaction_type = $type;
     }
 
     public function passes($attribute, $value){
 
-        $result = DB::table('dpr')->where('dpr_id', $value)->value('cancel');
-        if( EloquentHelper::recordExists($result) ){
+        if( $this->transaction_type == 'save' ){
 
-            return TRUE;
+            if( $value == '#Auto#'){
+
+                return TRUE;
+
+            }else{
+
+                $result = DB::table('dpr')->where('dpr_id', $value)->value('cancel');
+                if( EloquentHelper::recordExists($result) ){
+
+                    if($result == TRUE){
+
+                        $this->return_message = 'This daily progress note is Cancelled.';
+                        return FALSE;
+                    }else{
+
+                        return TRUE;
+                    }
+                }else{
+
+                    return TRUE;
+                }
+            }
+
         }else{
 
-            return FALSE;
+
+            if( $value == '#Auto#'){
+
+                $this->return_message = 'Invalied daily progress note no.';
+                return FALSE;
+
+            }else{
+
+                $result = DB::table('dpr')->where('dpr_id', $value)->value('cancel');
+                if( EloquentHelper::recordExists($result) ){
+
+                    if($result == TRUE){
+
+                        $this->return_message = 'This record is already cancelled.';
+                        return FALSE;
+
+                    }else{
+
+                        return TRUE;
+                    }
+                }else{
+
+                    return TRUE;
+                }
+            }
+
         }
     }
 
     public function message(){
 
-        return 'This Daily Progress record is Cancelled.';
+        return  $this->return_message;
     }
 }
