@@ -22,7 +22,6 @@ class EloquentHelper{
 
                 if( count($result) >= 1 ){
 
-                    echo 'Array count more than zero' . "\n";
                     return TRUE;
 
                 }else{
