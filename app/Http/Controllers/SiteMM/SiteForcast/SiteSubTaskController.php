@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\SiteMM\Master\Site;
+use App\Models\SiteMM\Master\Unit;
 use App\Models\SiteMM\Master\Status;
 use App\Models\SiteMM\SiteForcast\SiteTask;
 use App\Models\SiteMM\SiteForcast\SiteSubTask;
@@ -16,6 +17,7 @@ use Illuminate\Support\MessageBag;
 use Illuminate\Support\Carbon;
 
 use App\Rules\ZeroValidation;
+use App\Rules\QuantityValidation;
 
 class SiteSubTaskController extends Controller {
 
@@ -23,6 +25,7 @@ class SiteSubTaskController extends Controller {
 
         $data['site'] = Site::where('active', 1)->get();
         $data['task'] = SiteTask::where('active', 1)->get();
+        $data['unit'] = Unit::where('active', 1)->get();
         $data['status'] = Status::where('active', 1)->get();
         $data['attributes'] = $this->getSiteSubTaskAttributes(NULL, NULL);
 
@@ -35,6 +38,8 @@ class SiteSubTaskController extends Controller {
         $attributes['sub_task_name'] = '';
         $attributes['site_id'] = '0';
         $attributes['task_id'] = '0';
+        $attributes['unit_id'] = '0';
+        $attributes['quantity'] = 0;
         $attributes['start_date'] = '';
         $attributes['end_date'] = '';
         $attributes['active'] = 1;
@@ -59,6 +64,8 @@ class SiteSubTaskController extends Controller {
                 $attributes['sub_task_name'] = $elqSiteSubTask->sub_task_name;
                 $attributes['site_id'] = $elqSiteSubTask->site_id;
                 $attributes['task_id'] = $elqSiteSubTask->task_id;
+                $attributes['unit_id'] = $elqSiteSubTask->unit_id;
+                $attributes['quantity'] = $elqSiteSubTask->quantity;
                 $attributes['start_date'] = $elqSiteSubTask->start_date;
                 $attributes['end_date'] = $elqSiteSubTask->end_date;
                 $attributes['active'] = $elqSiteSubTask->active;
@@ -89,6 +96,8 @@ class SiteSubTaskController extends Controller {
                 $attributes['sub_task_name'] = $inputs['sub_task_name'];
                 $attributes['site_id'] = $inputs['site_id'];
                 $attributes['task_id'] = $inputs['task_id'];
+                $attributes['unit_id'] = $inputs['unit_id'];
+                $attributes['quantity'] = $inputs['quantity'];
                 $attributes['start_date'] = $inputs['start_date'];
                 $attributes['end_date'] = $inputs['end_date'];
                 $attributes['active'] = $inputs['active'];
@@ -135,6 +144,7 @@ class SiteSubTaskController extends Controller {
 
         $data['site'] = Site::where('active', 1)->get();
         $data['task'] = SiteTask::where('site_id', $data['attributes']['site_id'])->get();
+        $data['unit'] = Unit::where('active', 1)->get();
         $data['status'] = Status::where('active', 1)->get();
 
         return view('SiteMM.SiteForcast.site_sub_task')->with('SubSite', $data);
@@ -148,6 +158,8 @@ class SiteSubTaskController extends Controller {
             $inputs['sub_task_name'] = $request->sub_task_name;
             $inputs['site_id'] = $request->site_id;
             $inputs['task_id'] = $request->task_id;
+            $inputs['unit_id'] = $request->unit_id;
+            $inputs['quantity'] = $request->quantity;
             $inputs['start_date'] = $request->start_date;
             $inputs['end_date'] = $request->end_date;
             $inputs['status_id'] = $request->status_id;
@@ -157,6 +169,8 @@ class SiteSubTaskController extends Controller {
             $rules['sub_task_name'] = array('required', 'max:150');
             $rules['site_id'] = array( new ZeroValidation('Site', $request->site_id));
             $rules['task_id'] = array( new ZeroValidation('Task', $request->task_id));
+            $rules['unit_id'] = array( new ZeroValidation('Unit', $request->unit_id));
+            $rules['quantity'] = array( new QuantityValidation('Quantity', $request->quantity));
             $rules['start_date'] = array('required', 'date');
             $rules['end_date'] = array('required', 'date');
             $rules['status_id'] = array( new ZeroValidation('Status', $request->status_id));
@@ -174,7 +188,7 @@ class SiteSubTaskController extends Controller {
             $process_result['validation_result'] = $validator->passes();
             $process_result['validation_messages'] =  $validator->errors();
             $process_result['front_end_message'] = $front_end_message;
-            $process_result['back_end_message'] =  'Site Controller - Validation Process ';
+            $process_result['back_end_message'] =  'Site Sub Task Controller - Validation Process ';
 
             return $process_result;
 
@@ -183,7 +197,7 @@ class SiteSubTaskController extends Controller {
         //     $process_result['validation_result'] = FALSE;
         //     $process_result['validation_messages'] = new MessageBag();
         //     $process_result['front_end_message'] =  $e->getMessage();
-        //     $process_result['back_end_message'] =  'Site Controller - Validation Function Fault';
+        //     $process_result['back_end_message'] =  'Site Sub Task Controller - Validation Function Fault';
 
 		// 	return $process_result;
         // }
@@ -205,7 +219,7 @@ class SiteSubTaskController extends Controller {
         //     $process_result['site_id'] = $request->site_id;
         //     $process_result['process_status'] = FALSE;
         //     $process_result['front_end_message'] = $e->getMessage();
-        //     $process_result['back_end_message'] = 'Site Controller -> Site Saving Process <br> ' . $e->getLine();
+        //     $process_result['back_end_message'] = 'Site Sub Task Controller -> Site Saving Process <br> ' . $e->getLine();
 
         //     return $process_result;
         // }
@@ -217,6 +231,8 @@ class SiteSubTaskController extends Controller {
         $site_sub_task['sub_task_name'] = $request->sub_task_name;
         $site_sub_task['site_id'] = $request->site_id;
         $site_sub_task['task_id'] = $request->task_id;
+        $site_sub_task['unit_id'] = $request->unit_id;
+        $site_sub_task['quantity'] = $request->quantity;
         $site_sub_task['start_date'] = $request->start_date;
         $site_sub_task['end_date'] = $request->end_date;
         $site_sub_task['active'] = $request->active;
@@ -248,6 +264,7 @@ class SiteSubTaskController extends Controller {
 
         $data['site'] = Site::where('active', 1)->get();
         $data['task'] = SiteTask::where('site_id', $request->open_site_no)->get();
+        $data['unit'] = Unit::where('active', 1)->get();
         $data['status'] = Status::where('active', 1)->get();
 
         $data['attributes'] = $this->getSiteSubTaskAttributes($process_result, $request);

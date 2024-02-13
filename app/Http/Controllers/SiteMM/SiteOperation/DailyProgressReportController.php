@@ -32,7 +32,7 @@ class DailyProgressReportController extends Controller {
     public function loadView(){
 
         $data['site'] = Site::where('active', 1)->get();
-        $data['cost_section'] = CostSection::where('active', 1)->whereIn('cs_id', [1, 3])->get();
+        $data['cost_section'] = CostSection::where('active', 1)->whereIn('cs_id', [1, 3, 5])->get();
         $data['item'] = array();
         $data['site_task'] = array();
         $data['site_sub_task'] = array();
@@ -54,6 +54,7 @@ class DailyProgressReportController extends Controller {
         $attributes['unit'] = '';
         $attributes['price'] = 0;
         $attributes['quantity'] = 0;
+        $attributes['working_quantity'] = '';
         $attributes['dpr_detail'] = array();
         $attributes['dpr_total'] = 0;
 
@@ -70,12 +71,14 @@ class DailyProgressReportController extends Controller {
             $elqDpr = DailyProgress::where('dpr_id', $process['dpr_id'] )->first();
             $elqDprDetail = DailyProgressDetail::where('dpr_id', $process['dpr_id'])->get();
             $dpr_total = 0;
+            $working_quantity = 0;
 
             foreach($elqDprDetail as $key => $value){
 
                 $unit_id = Item::where('item_id', $value->item_id)->value('unit_id');
 
                 $value->ono = ($key+1);
+                $working_quantity = $value->working_quantity;
                 $value->unit_name = Unit::where('unit_id', $unit_id)->value('unit_name');
                 if( $elqDpr->cs_id == 1 ){
                     $value->item_name = Item::where('item_id', $value->item_id)->value('item_name');
@@ -96,6 +99,7 @@ class DailyProgressReportController extends Controller {
             $attributes['unit'] = '';
             $attributes['price'] = 0;
             $attributes['quantity'] = 0;
+            $attributes['working_quantity'] = $working_quantity;
             $attributes['dpr_detail'] = $elqDprDetail;
             $attributes['dpr_total'] = $elqDprDetail->sum('amount');
 
@@ -128,6 +132,7 @@ class DailyProgressReportController extends Controller {
                 $attributes['unit'] = $inputs['unit'];
                 $attributes['price'] = $inputs['price'];
                 $attributes['quantity'] = $inputs['quantity'];
+                $attributes['working_quantity'] = $inputs['working_quantity'];
             }
 
             $elqDprDetail = DailyProgressDetail::where('dpr_id', $request->dpr_id)->get();
@@ -167,7 +172,7 @@ class DailyProgressReportController extends Controller {
             $data['attributes'] = $this->getDailyProgressReportAttributes(NULL, NULL);
         }
 
-        if($request->submit == 'Add'){
+        if(($request->submit == 'Add') || ($request->submit == 'Save') ){
 
             $dpr_validation_result = $this->validateDPR($request);
             if($dpr_validation_result['validation_result'] == TRUE){
@@ -213,7 +218,7 @@ class DailyProgressReportController extends Controller {
         }
 
         $data['site'] = Site::where('active', 1)->get();
-        $data['cost_section'] = CostSection::where('active', 1)->whereIn('cs_id', [1, 3])->get();
+        $data['cost_section'] = CostSection::where('active', 1)->whereIn('cs_id', [1, 3, 5])->get();
         $data['site_task'] = SiteTask::where('active', 1)->where('site_id', $request->site_id)->get();
         $data['site_sub_task'] = SiteSubTask::where('active', 1)->where('task_id', $request->task_id)->get();
 
@@ -230,9 +235,16 @@ class DailyProgressReportController extends Controller {
             $inputs['site_id'] = $request->site_id;
             $inputs['task_id'] = $request->task_id;
             $inputs['sub_task_id'] = $request->sub_task_id;
-            $inputs['item_id'] = $request->item_id;
-            $inputs['price'] = InputHelper::currencyToNumber($request->price);
-            $inputs['quantity'] = $request->quantity;
+
+            if($request->cs_id == 5){
+
+                $inputs['working_quantity'] = $request->working_quantity;
+            }else{
+
+                $inputs['item_id'] = $request->item_id;
+                $inputs['price'] = InputHelper::currencyToNumber($request->price);
+                $inputs['quantity'] = $request->quantity;
+            }
             $inputs['remark'] = $request->remark;
 
             $rules['dpr_id'] = array('required', new DprCancelValidation('save'));
@@ -241,13 +253,20 @@ class DailyProgressReportController extends Controller {
             $rules['site_id'] = array( new ZeroValidation('Site', $request->site_id));
             $rules['task_id'] = array( new ZeroValidation('Task', $request->task_id));
             $rules['sub_task_id'] = array( new ZeroValidation('Sub Task', $request->sub_task_id));
-            if( ($request->cs_id == 1)  || ($request->cs_id == 0) ){
-                $rules['item_id'] = array( new ZeroValidation('Item', $request->item_id));
-            }elseif( $request->cs_id == 3 ){
-                $rules['item_id'] = array( new ZeroValidation('Overhead Cost Item', $request->item_id));
+
+            if($request->cs_id == 5){
+
+                $rules['working_quantity'] = array('required', 'numeric', new CurrencyValidation(1));
+            }else{
+
+                if( ($request->cs_id == 1)  || ($request->cs_id == 0) ){
+                    $rules['item_id'] = array( new ZeroValidation('Item', $request->item_id));
+                }elseif( $request->cs_id == 3 ){
+                    $rules['item_id'] = array( new ZeroValidation('Overhead Cost Item', $request->item_id));
+                }
+                $rules['price'] = array('required', 'numeric', new CurrencyValidation(1));
+                $rules['quantity'] = array('required', 'numeric', new CurrencyValidation(1));
             }
-            $rules['price'] = array('required', 'numeric', new CurrencyValidation(1));
-            $rules['quantity'] = array('required', 'numeric', new CurrencyValidation(1));
             $rules['remark'] = array( 'max:100');
 
             $front_end_message = '';
@@ -340,10 +359,22 @@ class DailyProgressReportController extends Controller {
     private function getDailyProgressDetailArray($request){
 
         $dpr_detail['dpr_id'] = 0;
-        $dpr_detail['item_id'] = $request->item_id;
-        $dpr_detail['price'] = str_replace(",","",$request->price);
-        $dpr_detail['quantity'] = $request->quantity;
-        $dpr_detail['amount'] = floatval(str_replace(",","",$request->price)) * $request->quantity;
+        if($request->cs_id == 5){
+
+            $dpr_detail['item_id'] = 0;
+            $dpr_detail['price'] = 0;
+            $dpr_detail['quantity'] = 0;
+            $dpr_detail['amount'] = 0;
+            $dpr_detail['working_quantity'] = $request->working_quantity;
+
+        }else{
+
+            $dpr_detail['item_id'] = $request->item_id;
+            $dpr_detail['price'] = str_replace(",","",$request->price);
+            $dpr_detail['quantity'] = $request->quantity;
+            $dpr_detail['amount'] = floatval(str_replace(",","",$request->price)) * $request->quantity;
+            $dpr_detail['working_quantity'] = 0;
+        }
 
         if($request->dpr_id == '#Auto#'){
 
@@ -400,6 +431,7 @@ class DailyProgressReportController extends Controller {
             $attributes['unit'] = '';
             $attributes['price'] = 0;
             $attributes['quantity'] = 0;
+            $attributes['working_quantity'] = '';
             $attributes['dpr_total'] = $elqDailyProgress->dpr_total;
             $attributes['dpr_detail'] = $elqDailyProgress->getDprDetail;
 
@@ -427,7 +459,7 @@ class DailyProgressReportController extends Controller {
         $data['site'] = Site::where('active', 1)->get();
         $data['site_task'] = SiteTask::where('active', 1)->where('site_id', $attributes['task_id'])->get();
         $data['site_sub_task'] = SiteSubTask::where('active', 1)->where('task_id', $attributes['sub_task_id'])->get();
-        $data['cost_section'] = CostSection::where('active', 1)->whereIn('cs_id', [1, 3])->get();
+        $data['cost_section'] = CostSection::where('active', 1)->whereIn('cs_id', [1, 3, 5])->get();
 
         return view('SiteMM.SiteOperation.dpr')->with('DPR', $data);
     }

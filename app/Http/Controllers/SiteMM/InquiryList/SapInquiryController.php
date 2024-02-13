@@ -29,7 +29,7 @@ class SapInquiryController extends Controller {
         $data['site'] = Site::where('active', 1)->get();
         $data['site_task'] = array();
         $data['site_sub_task'] = array();
-        $data['cost_section'] = CostSection::all();
+        $data['cost_section'] = CostSection::where('id', '!=', 5)->get();
         $data['stsil_detail'] = array();
         $data['source'] = '';
         $data['source_name'] = 'Name';
@@ -187,7 +187,7 @@ class SapInquiryController extends Controller {
         $data['site_task'] = SiteTask::where('active', 1)->where('site_id', $request->site_id)->get();
         $data['site_sub_task'] = array();
         $data['stsil_detail'] = $result;
-        $data['cost_section'] = CostSection::all();
+        $data['cost_section'] = CostSection::where('id', '!=', 5)->get();
         $data['attributes'] = $this->getSapInquiryAttributes(NULL, $request);
 
         return view('SiteMM.InquiryList.sap_inquire')->with('stsil', $data);

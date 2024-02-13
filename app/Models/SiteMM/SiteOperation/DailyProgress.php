@@ -80,7 +80,10 @@ class DailyProgress extends Model {
             $dpr_total_amount = DB::table('dpr_detail')->where('dpr_id', $dpr_id)->sum('amount');
             DB::table('dpr')->where('dpr_id', $dpr_id)->update(['total_amount' => $dpr_total_amount]);
 
-            DB::table('dpr_detail')->where('dpr_id', $dpr_id)->where('item_id', $dpr_detail['item_id'])->where('quantity', 0)->delete();
+            if( ! ($dpr['cs_id'] == 5) ){
+
+                DB::table('dpr_detail')->where('dpr_id', $dpr_id)->where('item_id', $dpr_detail['item_id'])->where('quantity', 0)->delete();
+            }
 
             DB::commit();
 

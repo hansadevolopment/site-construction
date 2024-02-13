@@ -166,6 +166,21 @@
                                     </div>
                                 </div>
 
+                                <div id="dpr_quantity" style="display:none;">
+                                    <div class="row mb-2">
+                                        <label for="tid" class="col-sm-1 col-form-label-sm">Working Qty</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" name="working_quantity" id="working_quantity" class="form-control form-control-sm text-end" value="{{$DPR['attributes']['working_quantity']}}">
+                                            @if($DPR['attributes']['validation_messages']->has('working_quantity'))
+                                                <script>
+                                                        document.getElementById('working_quantity').className = 'form-select form-select-sm is-invalid';
+                                                </script>
+                                                <div class="invalid-feedback">{{ $DPR['attributes']['validation_messages']->first("working_quantity") }}</div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="row mb-3">
                                     <label for="tid" class="col-sm-1 col-form-label-sm">Remark</label>
                                     <div class="col-sm-11">
@@ -180,6 +195,9 @@
                                 </div>
 
                                 <div class="row mb-2">
+                                    <div id="btn_save" class="col-sm-1" style="display:none;">
+                                        <input type="submit" name="submit" id="submit" class="btn btn-success btn-sm w-100" value="Save">
+                                    </div>
                                     <div class="col-sm-1">
                                         <input type="submit" name="submit" id="submit" class="btn btn-primary btn-sm w-100" value="Reset">
                                     </div>
@@ -189,122 +207,127 @@
                                 </div>
                                 <hr>
 
-                                <div class="row mb-3">
+                                <div id="dpr_none_quantity">
 
-                                    <label for="tid" class="col-sm-1 col-form-label-sm">Item</label>
-                                    <div class="col-sm-5">
-                                        <select name="item_id" id="item_id" class="form-select form-select-sm dpr-item">
-                                            @if($DPR['attributes']['cs_id'] == 1)
-                                                @foreach($DPR['item'] as $row)
-                                                    @if($DPR['attributes']['item_id'] == $row->item_id)
-                                                        <option value ="{{$row->item_id}}" selected>{{$row->item_name}}</option>
-                                                    @else
-                                                        <option value ="{{$row->item_id}}">{{$row->item_name}}</option>
-                                                    @endif
-                                                @endforeach
-                                            @elseif( $DPR['attributes']['cs_id'] == 3 )
-                                                @foreach($DPR['item'] as $row)
-                                                    @if($DPR['attributes']['item_id'] == $row->item_id)
-                                                        <option value ="{{$row->oci_id}}" selected>{{$row->oci_name}}</option>
-                                                    @else
-                                                        <option value ="{{$row->oci_id}}">{{$row->oci_name}}</option>
-                                                    @endif
-                                                @endforeach
-                                            @else
+                                    <div class="row mb-3">
+
+                                        <label for="tid" class="col-sm-1 col-form-label-sm">Item</label>
+                                        <div class="col-sm-5">
+                                            <select name="item_id" id="item_id" class="form-select form-select-sm dpr-item">
+                                                @if($DPR['attributes']['cs_id'] == 1)
+                                                    @foreach($DPR['item'] as $row)
+                                                        @if($DPR['attributes']['item_id'] == $row->item_id)
+                                                            <option value ="{{$row->item_id}}" selected>{{$row->item_name}}</option>
+                                                        @else
+                                                            <option value ="{{$row->item_id}}">{{$row->item_name}}</option>
+                                                        @endif
+                                                    @endforeach
+                                                @elseif( $DPR['attributes']['cs_id'] == 3 )
+                                                    @foreach($DPR['item'] as $row)
+                                                        @if($DPR['attributes']['item_id'] == $row->item_id)
+                                                            <option value ="{{$row->oci_id}}" selected>{{$row->oci_name}}</option>
+                                                        @else
+                                                            <option value ="{{$row->oci_id}}">{{$row->oci_name}}</option>
+                                                        @endif
+                                                    @endforeach
+                                                @else
+                                                @endif
+                                                @if($DPR['attributes']['item_id'] == 0)
+                                                    <option value ="0" selected>Select the Item</option>
+                                                @endif
+                                            </select>
+                                            @if($DPR['attributes']['validation_messages']->has('item_id'))
+                                                <script>
+                                                        document.getElementById('item_id').className = 'form-select form-select-sm is-invalid';
+                                                </script>
+                                                <div class="invalid-feedback">{{ $DPR['attributes']['validation_messages']->first("item_id") }}</div>
                                             @endif
-                                            @if($DPR['attributes']['item_id'] == 0)
-                                                <option value ="0" selected>Select the Item</option>
+                                        </div>
+
+                                        <div class="col-sm-1">
+                                            <input type="text" name="unit" id="unit" class="form-control form-control-sm" placeholder="Unit" value="{{$DPR['attributes']['unit']}}" readonly>
+                                        </div>
+
+                                        <div class="col-sm-2">
+                                            <input type="text" name="price" id="price" class="form-control form-control-sm text-end" placeholder="Price" value="{{$DPR['attributes']['price']}}">
+                                            @if($DPR['attributes']['validation_messages']->has('price'))
+                                                <script>
+                                                        document.getElementById('price').className = 'form-control form-control-sm is-invalid text-end';
+                                                </script>
+                                                <div class="invalid-feedback">{{ $DPR['attributes']['validation_messages']->first("price") }}</div>
                                             @endif
-                                        </select>
-                                        @if($DPR['attributes']['validation_messages']->has('item_id'))
-                                            <script>
-                                                    document.getElementById('item_id').className = 'form-select form-select-sm is-invalid';
-                                            </script>
-                                            <div class="invalid-feedback">{{ $DPR['attributes']['validation_messages']->first("item_id") }}</div>
-                                        @endif
+                                        </div>
+
+                                        <div class="col-sm-2">
+                                            <input type="text" name="quantity" id="quantity" class="form-control form-control-sm text-end" placeholder="Quantity" value="{{$DPR['attributes']['quantity']}}">
+                                            @if($DPR['attributes']['validation_messages']->has('quantity'))
+                                                <script>
+                                                        document.getElementById('quantity').className = 'form-control form-control-sm is-invalid text-end';
+                                                </script>
+                                                <div class="invalid-feedback">{{ $DPR['attributes']['validation_messages']->first("quantity") }}</div>
+                                            @endif
+                                        </div>
+
+                                        <div class="col-sm-1">
+                                            <input type="submit" name="submit" id="submit" class="btn btn-success btn-sm w-100" value="Add">
+                                        </div>
                                     </div>
 
-                                    <div class="col-sm-1">
-                                        <input type="text" name="unit" id="unit" class="form-control form-control-sm" placeholder="Unit" value="{{$DPR['attributes']['unit']}}" readonly>
+                                    <div class="row mb-3">
+                                        <div class="col-12 colmd-12">
+                                            <div class="table-responsive">
+                                                <table class="table table-sm table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 5%;">#</th>
+                                                            <th style="width: 55%;">Item</th>
+                                                            <th style="width: 10%;">Unit</th>
+                                                            <th style="width: 10%;" class="text-end">Price</th>
+                                                            <th style="width: 10%;" class="text-end">Qty</th>
+                                                            <th style="width: 10%;" class="text-end">(Rs.) Amount</th>
+                                                        </tr>
+                                                    </thead>
+                                                    @if( count($DPR['attributes']['dpr_detail']) >= 1 )
+
+                                                        <tbody>
+                                                            @foreach ($DPR['attributes']['dpr_detail'] as $rowKey => $rowValue)
+                                                                <tr>
+                                                                    <td style="width: 5%;">{{$rowValue->ono}}</td>
+                                                                    <td style="width: 45%;">{{$rowValue->item_name}}</td>
+                                                                    <td style="width: 10%;">{{$rowValue->unit_name}}</td>
+                                                                    <td style="width: 10%;" class="text-end">@money($rowValue->price)</td>
+                                                                    <td style="width: 10%;" class="text-end">{{$rowValue->quantity}}</td>
+                                                                    <td style="width: 10%;" class="text-end">@money($rowValue->amount)</td>
+                                                                </tr>
+                                                            @endforeach
+                                                            <tr>
+                                                                <td colspan="5">Total</td>
+                                                                <td class="text-end"><strong>@money($DPR['attributes']['dpr_total'])</strong></td>
+                                                                <td></td>
+                                                            </tr>
+                                                        </tbody>
+
+                                                    @else
+                                                        <tbody>
+                                                            <tr>
+                                                                <td style="width: 5%;">-</td>
+                                                                <td style="width: 45%;">-</td>
+                                                                <td style="width: 10%;">-</td>
+                                                                <td style="width: 10%;" class="text-end">0.00</td>
+                                                                <td style="width: 10%;" class="text-end">0</td>
+                                                                <td style="width: 10%;" class="text-end">0.00</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    @endif
+                                                </table>
+                                            </div>
+
+                                        </div>
                                     </div>
 
-                                    <div class="col-sm-2">
-                                        <input type="text" name="price" id="price" class="form-control form-control-sm text-end" placeholder="Price" value="{{$DPR['attributes']['price']}}">
-                                        @if($DPR['attributes']['validation_messages']->has('price'))
-                                            <script>
-                                                    document.getElementById('price').className = 'form-control form-control-sm is-invalid text-end';
-                                            </script>
-                                            <div class="invalid-feedback">{{ $DPR['attributes']['validation_messages']->first("price") }}</div>
-                                        @endif
-                                    </div>
-
-                                    <div class="col-sm-2">
-                                        <input type="text" name="quantity" id="quantity" class="form-control form-control-sm text-end" placeholder="Quantity" value="{{$DPR['attributes']['quantity']}}">
-                                        @if($DPR['attributes']['validation_messages']->has('quantity'))
-                                            <script>
-                                                    document.getElementById('quantity').className = 'form-control form-control-sm is-invalid text-end';
-                                            </script>
-                                            <div class="invalid-feedback">{{ $DPR['attributes']['validation_messages']->first("quantity") }}</div>
-                                        @endif
-                                    </div>
-
-                                    <div class="col-sm-1">
-                                        <input type="submit" name="submit" id="submit" class="btn btn-success btn-sm w-100" value="Add">
-                                    </div>
                                 </div>
 
 
-                                <hr>
-
-                            </div>
-
-                            <div class="col-12 colmd-12">
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th style="width: 5%;">#</th>
-                                                <th style="width: 55%;">Item</th>
-                                                <th style="width: 10%;">Unit</th>
-                                                <th style="width: 10%;" class="text-end">Price</th>
-                                                <th style="width: 10%;" class="text-end">Qty</th>
-                                                <th style="width: 10%;" class="text-end">(Rs.) Amount</th>
-                                            </tr>
-                                        </thead>
-                                        @if( count($DPR['attributes']['dpr_detail']) >= 1 )
-
-                                            <tbody>
-                                                @foreach ($DPR['attributes']['dpr_detail'] as $rowKey => $rowValue)
-                                                    <tr>
-                                                        <td style="width: 5%;">{{$rowValue->ono}}</td>
-                                                        <td style="width: 45%;">{{$rowValue->item_name}}</td>
-                                                        <td style="width: 10%;">{{$rowValue->unit_name}}</td>
-                                                        <td style="width: 10%;" class="text-end">@money($rowValue->price)</td>
-                                                        <td style="width: 10%;" class="text-end">{{$rowValue->quantity}}</td>
-                                                        <td style="width: 10%;" class="text-end">@money($rowValue->amount)</td>
-                                                    </tr>
-                                                @endforeach
-                                                <tr>
-                                                    <td colspan="5">Total</td>
-                                                    <td class="text-end"><strong>@money($DPR['attributes']['dpr_total'])</strong></td>
-                                                    <td></td>
-                                                </tr>
-                                            </tbody>
-
-                                        @else
-                                            <tbody>
-                                                <tr>
-                                                    <td style="width: 5%;">-</td>
-                                                    <td style="width: 45%;">-</td>
-                                                    <td style="width: 10%;">-</td>
-                                                    <td style="width: 10%;" class="text-end">0.00</td>
-                                                    <td style="width: 10%;" class="text-end">0</td>
-                                                    <td style="width: 10%;" class="text-end">0.00</td>
-                                                </tr>
-                                            </tbody>
-                                        @endif
-                                    </table>
-                                  </div>
 
                             </div>
 
