@@ -16,12 +16,20 @@ class EmployeeSalaryCancalValidation implements Rule {
     public function passes($attribute, $value) {
 
         $result = DB::table('employee_salary')->where('es_id', $value)->value('cancel');
-        if( EloquentHelper::recordExists($result) ){
+        if( is_null($result) ){
 
             return TRUE;
+
         }else{
 
-            return FALSE;
+            if($result == 1){
+
+                return FALSE;
+
+            }else{
+
+                return TRUE;
+            }
         }
 
     }
