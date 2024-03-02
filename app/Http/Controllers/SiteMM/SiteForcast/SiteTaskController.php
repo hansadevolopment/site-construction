@@ -225,7 +225,10 @@ class SiteTaskController extends Controller {
 
         foreach($elqSiteTask->subTask as $subTaskKey => $SubTaskValue){
 
-            $return_text .= " <option value = '". $SubTaskValue->sub_task_id ."'>". $SubTaskValue->sub_task_name ."</option> ";
+            if( $SubTaskValue->active == 1 ){
+
+                $return_text .= " <option value = '". $SubTaskValue->sub_task_id ."'>". $SubTaskValue->sub_task_name ."</option> ";
+            }
         }
         $return_text .= " <option value = '0' selected> Select the Sub Task </option> ";
 
