@@ -106,6 +106,16 @@
                                             <div class="invalid-feedback">{{ $SOR['attributes']['validation_messages']->first("sub_task_id") }}</div>
                                         @endif
                                     </div>
+                                </div>
+
+                                <div class="row mb-2">
+                                    <label for="tid" class="col-sm-1 col-form-label-sm">Report</label>
+                                    <div class="col-sm-5">
+                                        <select name="report_type" id="report_type" class="form-select form-select-sm" >
+                                            <option value ="1"> Summary Report </option>
+                                            <option value ="2"> Detail Report </option>
+                                        </select>
+                                    </div>
 
                                     <div class="col-sm-2">
                                         <input type="submit" name="submit" id="submit" class="btn btn-primary btn-sm w-100" value="Genarate">
