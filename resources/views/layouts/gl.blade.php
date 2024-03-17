@@ -60,13 +60,28 @@
                             </a>
                             <ul class="dropdown-menu dropdown-single-menu-content">
                                 <li><a href={{route('sap_report')}}>Chart of Account</a></li>
-                                <li><a href={{route('so_summary_report')}}>General Ledger</a></li>
+                                <li><a href={{route('ledger')}}>General Ledger</a></li>
                                 <li><a href={{route('so_summary_report')}}>Profit & Loss Account</a></li>
                                 <li><a href={{route('so_summary_report')}}>Balance Sheet</a></li>
                             </ul>
                         </li>
                     </ul>
                 </div>
+
+                <div class="d-flex">
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Module
+                        </a>
+                        <ul class="dropdown-menu dropdown-single-menu-content navbar-menu-context-right">
+                            <li><a href="#">Site Operation</a></li>
+                                <li><a href="#">General Ledger</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="d-flex">
+                </div>
+
                 <div class="d-flex">
                     <div class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
