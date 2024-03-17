@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+/*------------------------------------------------------------- Site Construction Module -------------------------------------------------------------*/
+
 use App\Http\Controllers\SiteMM\Master\SiteController;
 use App\Http\Controllers\SiteMM\Master\ItemController;
 use App\Http\Controllers\SiteMM\Master\LabourCategoryController;
@@ -44,6 +46,8 @@ use App\Http\Controllers\SiteMM\InquiryList\SoInquiryController;
 use App\Http\Controllers\SiteMM\Report\SapReportController;
 use App\Http\Controllers\SiteMM\Report\SiteOperationReportController;
 
+/*------------------------------------------------------------- Genaral Ledger Module -------------------------------------------------------------*/
+
 use App\Http\Controllers\GL\Primary\BankController;
 use App\Http\Controllers\GL\Primary\TaxController;
 use App\Http\Controllers\GL\Primary\MainAccountController;
@@ -60,6 +64,27 @@ use App\Http\Controllers\GL\Report\TrialBalanceController;
 use App\Http\Controllers\GL\Report\LedgerController;
 use App\Http\Controllers\GL\Report\ProfitLostReportController;
 use App\Http\Controllers\GL\Report\BalanceSheetController;
+
+/*------------------------------------------------------------- Sales Module -------------------------------------------------------------*/
+
+use App\Http\Controllers\Sales\Primary\SalesCategoryController;
+use App\Http\Controllers\Sales\Primary\SalesLocationController;
+use App\Http\Controllers\Sales\Primary\SalesRepController;
+use App\Http\Controllers\Sales\Primary\DebtorController;
+
+use App\Http\Controllers\Sales\Transaction\InvoiceController;
+use App\Http\Controllers\Sales\Transaction\ReceiptController;
+use App\Http\Controllers\Sales\Transaction\SalesReturnController;
+use App\Http\Controllers\Sales\Transaction\CreditNoteController;
+use App\Http\Controllers\Sales\Transaction\CustomOrderController;
+use App\Http\Controllers\Sales\Transaction\SalesSettlementController;
+
+use App\Http\Controllers\Sales\ListInquire\SalesPrimaryListInquireController;
+use App\Http\Controllers\Sales\ListInquire\SalesTransactionListInquireController;
+
+use App\Http\Controllers\Sales\Report\DebtorLedgerController;
+use App\Http\Controllers\Sales\Report\DebtorStatementAgeAnalysisController;
+use App\Http\Controllers\Sales\Report\DebtorTransactionReportController;
 
 
 Route::get('/', function () {
@@ -254,3 +279,76 @@ Route::post('/profit_loss_account_process', [ProfitLostReportController::class, 
 
 Route::get('/balance_sheet', [BalanceSheetController::class, 'loadView'])->name('balance_sheet');
 Route::post('/balance_sheet_process', [BalanceSheetController::class, 'generateBalanceSheet'])->name('generate_balance_sheet');
+
+
+/*
+|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Sales Module Routes
+|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+*/
+
+/*------------------------------------------------------------- Primary -------------------------------------------------------------*/
+Route::get('/sales_category', [SalesCategoryController::class, 'loadView'])->name('sales_category');
+Route::post('/sales_category_process', [SalesCategoryController::class, 'saveSalesCategory'])->name('sales_category_process');
+Route::get('/open_sales_category', [SalesCategoryController::class, 'openSalesCategory'])->name('open_sales_category');
+
+Route::get('/sales_location', [SalesLocationController::class, 'loadView'])->name('sales_location');
+Route::post('/sales_location_process', [SalesLocationController::class, 'saveSalesLocation'])->name('sales_location_process');
+Route::get('/open_sales_location', [SalesLocationController::class, 'openSalesLocation'])->name('open_sales_location');
+
+Route::get('/sales_rep', [SalesRepController::class, 'loadView'])->name('sales_rep');
+Route::post('/sales_rep_process', [SalesRepController::class, 'saveSalesRep'])->name('sales_rep_process');
+Route::get('/open_sales_rep', [SalesRepController::class, 'openSalesRep'])->name('open_sales_rep');
+
+Route::get('/debtor', [DebtorController::class, 'loadView'])->name('debtor');
+Route::post('/debtor_process', [DebtorController::class, 'saveDebtor'])->name('debtor_process');
+Route::get('/open_debtor', [DebtorController::class, 'openDebtor'])->name('open_debtor');
+
+
+/*------------------------------------------------------------- Transaction -------------------------------------------------------------*/
+Route::get('/invoice', [InvoiceController::class, 'loadView'])->name('invoice');
+Route::post('/invoice_process', [InvoiceController::class, 'saveInvoice'])->name('invoice_process');
+Route::get('/open_invoice', [InvoiceController::class, 'openInvoice'])->name('open_invoice');
+Route::post('/remove_invoice_item', [InvoiceController::class, 'removeInvoiceItem'])->name('remove_invoice_item');
+
+Route::get('/receipt', [ReceiptController::class, 'loadView'])->name('receipt');
+Route::post('/receipt_process', [ReceiptController::class, 'saveReceipt'])->name('receipt_process');
+Route::get('/open_receipt', [ReceiptController::class, 'openReceipt'])->name('open_receipt');
+Route::post('/remove_receipt_item', [ReceiptController::class, 'removeReceiptItem'])->name('remove_receipt_item');
+
+Route::get('/sales_return', [SalesReturnController::class, 'loadView'])->name('sales_return');
+Route::post('/sales_return_process', [SalesReturnController::class, 'saveSalesReturn'])->name('sales_return_process');
+Route::get('/open_sales_return', [SalesReturnController::class, 'openSalesReturn'])->name('open_sales_return');
+Route::post('/remove_sales_return_item', [SalesReturnController::class, 'removeSalesReturnItem'])->name('remove_sales_return_item');
+
+Route::get('/credit_note', [CreditNoteController::class, 'loadView'])->name('credit_note');
+Route::post('/credit_note_process', [CreditNoteController::class, 'saveCreditNote'])->name('credit_note_process');
+Route::get('/open_credit_note', [CreditNoteController::class, 'openCreditNote'])->name('open_credit_note');
+Route::post('/remove_credit_note_item', [CreditNoteController::class, 'removeCreditNoteItem'])->name('remove_credit_note_item');
+
+Route::get('/sales_settlement', [SalesSettlementController::class, 'loadView'])->name('sales_settlement');
+Route::post('/sales_settlement_process', [SalesSettlementController::class, 'saveSalesSettlement'])->name('sales_settlement_process');
+Route::get('/open_sales_settlement', [SalesSettlementController::class, 'openSalesSettlement'])->name('open_sales_settlement');
+Route::post('/remove_sales_settlement_item', [SalesSettlementController::class, 'removeSalesSettlementItem'])->name('remove_sales_settlement_item');
+
+Route::get('/custom_order', [CustomOrderController::class, 'loadView'])->name('custom_order');
+Route::post('/custom_order_process', [CustomOrderController::class, 'saveCustomOrder'])->name('custom_order_process');
+Route::get('/open_custom_order', [CustomOrderController::class, 'openCustomOrder'])->name('open_custom_order');
+Route::post('/remove_custom_order_item', [CustomOrderController::class, 'removeCustomOrderItem'])->name('remove_custom_order_item');
+
+/*------------------------------------------------------------- Inquiry & List -------------------------------------------------------------*/
+Route::get('/sales_primary_inquire', [SalesPrimaryListInquireController::class, 'loadView'])->name('sales_primary_inquire');
+Route::post('/sales_primary_inquire_process', [SalesPrimaryListInquireController::class, 'processSalesPrimaryListInquire'])->name('sales_primary_inquire_process');
+
+Route::get('/sales_transaction_inquire', [SalesTransactionListInquireController::class, 'loadView'])->name('sales_transaction_inquire');
+Route::post('/sales_transaction_inquire_process', [SalesTransactionListInquireController::class, 'processSalesTransactionListInquire'])->name('sales_transaction_inquire_process');
+
+/*------------------------------------------------------------- Report -------------------------------------------------------------*/
+Route::get('/debtor_statement', [DebtorStatementAgeAnalysisController::class, 'loadView'])->name('debtor_statement');
+Route::post('/generate_debtor_statement', [DebtorStatementAgeAnalysisController::class, 'generateDebtorStatement'])->name('generate_debtor_statement');
+
+Route::get('/debtor_ledger', [DebtorLedgerController::class, 'loadView'])->name('debtor_ledger');
+Route::post('/generate_debtor_ledger', [DebtorLedgerController::class, 'generateDebtorLedger'])->name('generate_debtor_ledger');
+
+Route::get('/debtor_transaction_report', [DebtorTransactionReportController::class, 'loadView'])->name('debtor_transaction_report');
+Route::post('/generate_debtor_transaction_report', [DebtorTransactionReportController::class, 'generateDebtorTransactionReport'])->name('generate_debtor_transaction_report');
