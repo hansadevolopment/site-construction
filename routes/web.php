@@ -257,7 +257,7 @@ Route::post('/open_sub_account', [SubAccountController::class, 'openSubAccount']
 
 Route::get('/journal_entry', [JournalEntryController::class, 'loadView'])->name('journal_entry');
 Route::post('/journal_entry_process', [JournalEntryController::class, 'saveJournalEntry'])->name('journal_entry_process');
-Route::get('/open_journal_entry', [JournalEntryController::class, 'openJournalEntry'])->name('open_journal_entry');
+Route::post('/open_journal_entry', [JournalEntryController::class, 'openJournalEntry'])->name('open_journal_entry');
 Route::post('/remove_journal_entry', [JournalEntryController::class, 'removeJournalEntry'])->name('remove_journal_entry');
 
 Route::get('/pettycash', [PettyCashController::class, 'loadView'])->name('pettycash');

@@ -16,6 +16,8 @@ use Illuminate\Support\MessageBag;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
+use App\Helpers\Database\EloquentHelper;
+
 use App\Rules\ZeroValidation;
 use App\Rules\CurrencyValidation;
 use App\Rules\GL\Transaction\JournalEntryGLPostValidation;
@@ -50,17 +52,22 @@ class JournalEntryController extends Controller{
             return $attributes;
         }
 
-        $input = $request->input();
-        if(is_null($input) == FALSE){
 
-            $attributes['je_id'] = $input['je_id'];
-            $attributes['je_date'] = $input['je_date'];
-            $attributes['remark'] = $input['remark'];
-            $tmpJournalEntry = DB::table('tmp_journal_entry')->where('saved_by', Auth::user()->id)->orderBy('acc_type_id')->get();
-            $attributes['total_debit_amount'] = $tmpJournalEntry->where('acc_type_id', 1)->sum('amount');
-            $attributes['total_credit_amount'] = $tmpJournalEntry->where('acc_type_id', 2)->sum('amount');
-            $attributes['je_detail'] = $tmpJournalEntry;
+        if( method_exists($request,'input') ){
+
+            $input = $request->input();
+            if(is_null($input) == FALSE){
+
+                $attributes['je_id'] = $input['je_id'];
+                $attributes['je_date'] = $input['je_date'];
+                $attributes['remark'] = $input['remark'];
+                $tmpJournalEntry = DB::table('tmp_journal_entry')->where('saved_by', Auth::user()->id)->orderBy('acc_type_id')->get();
+                $attributes['total_debit_amount'] = $tmpJournalEntry->where('acc_type_id', 1)->sum('amount');
+                $attributes['total_credit_amount'] = $tmpJournalEntry->where('acc_type_id', 2)->sum('amount');
+                $attributes['je_detail'] = $tmpJournalEntry;
+            }
         }
+
 
         if( ($process['validation_result'] == TRUE) && ($process['process_status'] == TRUE)){
 
@@ -68,17 +75,30 @@ class JournalEntryController extends Controller{
             if( $request->submit == 'GL Post'){
 
                 $attributes['je_id'] = $process['je_id'];
-                $JournalEntry = DB::table('journal_entry_detail')->where('je_id', $process['je_id'])->orderBy('acc_type_id')->get();
-                $attributes['je_detail'] = $JournalEntry;
-                $attributes['total_debit_amount'] = $JournalEntry->where('acc_type_id', 1)->sum('amount');
-                $attributes['total_credit_amount'] = $JournalEntry->where('acc_type_id', 2)->sum('amount');
+                $JournalEntry = DB::table('journal_entry')->where('je_id', $process['je_id'])->first();
+                if( EloquentHelper::recordExists($JournalEntry)  ){
+
+                    $attributes['je_date'] = $JournalEntry->je_date;
+                    $attributes['remark'] = $JournalEntry->remark;
+                }
+
+                $JournalEntryDetail = DB::table('journal_entry_detail')->where('je_id', $process['je_id'])->orderBy('acc_type_id')->get();
+                $attributes['je_detail'] = $JournalEntryDetail;
+                $attributes['total_debit_amount'] = $JournalEntryDetail->where('acc_type_id', 1)->sum('amount');
+                $attributes['total_credit_amount'] = $JournalEntryDetail->where('acc_type_id', 2)->sum('amount');
             }
 
             $attributes['process_status'] = TRUE;
 			$attributes['validation_messages'] = new MessageBag();
 
-            $message = $process['front_end_message'];
-            $attributes['process_message'] = '<div class="alert alert-success" role="alert"> '. $message .' </div> ';
+            if( $process['front_end_message'] == '' ){
+
+                $attributes['process_message'] = '';
+            }else{
+
+                $message = $process['front_end_message'];
+                $attributes['process_message'] = '<div class="alert alert-success" role="alert"> '. $message .' </div> ';
+            }
 
 			return $attributes;
 
@@ -343,6 +363,29 @@ class JournalEntryController extends Controller{
         $data['attributes'] = $attributes;
         $data['sub_account'] = SubAccount::all();
         $data['account_type'] = AccType::all();
+
+        return view('GL.transaction.journal_entry')->with('JE', $data);
+    }
+
+    public function openJournalEntry(Request $request){
+
+
+        $process_result['je_id'] = $request->source_id;
+        $process_result['process_status'] = TRUE;
+        $process_result['front_end_message'] = "";
+        $process_result['back_end_message'] = "";
+        $process_result['validation_result'] = TRUE;
+        $process_result['validation_messages'] = new MessageBag();
+
+        $objRequest = new \stdClass();
+        $objRequest->je_id = $request->source_id;
+        $objRequest->je_date = '';
+        $objRequest->remark = '';
+        $objRequest->submit = 'GL Post';
+
+        $data['sub_account'] = SubAccount::all();
+        $data['account_type'] = AccType::all();
+        $data['attributes'] = $this->getJournalEntryAttributes($process_result, $objRequest);
 
         return view('GL.transaction.journal_entry')->with('JE', $data);
     }

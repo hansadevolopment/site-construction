@@ -17,18 +17,24 @@ class JournalEntryGLPostValidation implements Rule {
 
         $tmpJournalEntry = DB::table('tmp_journal_entry')->where('saved_by', Auth::user()->id)->orderBy('acc_type_id')->get();
 
-        $debit_amount = $tmpJournalEntry->where('acc_type_id', 1)->sum('amount');
-        $credit_amount = $tmpJournalEntry->where('acc_type_id', 2)->sum('amount');
+        if(count($tmpJournalEntry) >= 1){
 
-        if( $debit_amount == $credit_amount ){
+            $debit_amount = $tmpJournalEntry->where('acc_type_id', 1)->sum('amount');
+            $credit_amount = $tmpJournalEntry->where('acc_type_id', 2)->sum('amount');
 
-            return TRUE;
+            if( $debit_amount == $credit_amount ){
+
+                return TRUE;
+            }else{
+
+                return FALSE;
+            }
+
         }else{
 
             return FALSE;
         }
     }
-
 
     public function message(){
 

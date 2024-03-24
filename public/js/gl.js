@@ -47,3 +47,18 @@ $('.open-inquire').click(function(){
     $("#frm_source_open").submit();
 
 });
+
+$('.open-transaction-inquire').click(function(){
+
+    let source_id = $(this).data("source-id");
+    let gti_id = $(this).data("gti-id");
+
+    if( gti_id == 1){
+
+        $("#frm_source_open").attr('action', "/open_journal_entry");
+    }
+
+    $("#source_id").val(source_id);
+    $("#frm_source_open").submit();
+
+});
