@@ -31,7 +31,7 @@
                             <label for="tid" class="col-sm-2 col-form-label-sm">Controll Account</label>
                             <div class="col-sm-4">
                                 <select name="ca_id" id="ca_id" class="form-select form-select-sm">
-                                    @foreach($LR['main_account'] as $row)
+                                    @foreach($LR['controll_account'] as $row)
                                         <option value ="{{$row->ca_id}}">{{$row->ma_name}}</option>
                                     @endforeach
                                     <option value =0 selected>Select the Controll Accounts</option>
@@ -50,9 +50,15 @@
                             <div class="col-sm-7">
                                 <select name="sa_id" id="sa_id" class="form-select form-select-sm">
                                     @foreach($LR['sub_account'] as $row)
-                                        <option value ="{{$row->sa_id}}">{{$row->sa_name}}</option>
+                                        @if( $LR['attributes']['sa_id'] == $row->sa_id )
+                                            <option value ="{{$row->sa_id}}" selected>{{$row->sa_name}}</option>
+                                        @else
+                                            <option value ="{{$row->sa_id}}">{{$row->sa_name}}</option>
+                                        @endif
                                     @endforeach
-                                    <option value =0 selected>Select the Sub Accounts</option>
+                                    @if($LR['attributes']['sa_id'] == "0")
+                                        <option value =0 selected>Select the Sub Accounts</option>
+                                    @endif
                                 </select>
                                 @if($LR['attributes']['validation_messages']->has('sa_id'))
                                     <script>
@@ -109,6 +115,31 @@
                                             </tr>
 
                                         @endforeach
+
+                                        <tr style="font-family: Consolas; font-size: 14px;">
+                                            <td colspan="4" class="text-center"><strong>Account Balance Amount </strong></td>
+                                            @if( $LR['attributes']['ledger_bottom']['debit_amount'] == $LR['attributes']['ledger_bottom']['credit_amount'] )
+
+                                                <td class="text-end" style="width: 15%;"></td>
+                                                <td class="text-end" style="width: 15%;"></td>
+
+                                            @elseif( $LR['attributes']['ledger_bottom']['debit_amount'] > $LR['attributes']['ledger_bottom']['credit_amount'] )
+
+                                                <td class="text-end" style="width: 15%;"></td>
+                                                <td class="text-end" style="width: 15%;"><strong>@money($LR['attributes']['ledger_bottom']['balance_amount'])</strong></td>
+
+                                            @elseif( $LR['attributes']['ledger_bottom']['debit_amount'] < $LR['attributes']['ledger_bottom']['credit_amount'] )
+
+                                                <td class="text-end" style="width: 15%;"><strong>@money($LR['attributes']['ledger_bottom']['balance_amount'])</strong></td>
+                                                <td class="text-end" style="width: 15%;"></td>
+
+                                            @endif
+                                        </tr>
+                                        <tr style="font-family: Consolas; font-size: 14px;">
+                                            <td colspan="4"></td>
+                                            <td class="text-end" style="width: 15%;"><strong>@money($LR['attributes']['ledger_bottom']['highest_amount'])</strong></td>
+                                            <td class="text-end" style="width: 15%;"><strong>@money($LR['attributes']['ledger_bottom']['highest_amount'])</strong></td>
+                                        </tr>
 
                                     @endif
 

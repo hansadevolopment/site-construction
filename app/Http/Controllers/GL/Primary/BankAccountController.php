@@ -5,7 +5,8 @@ namespace App\Http\Controllers\GL\Primary;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-use App\Models\GL\Primary\Tax;
+use App\Models\GL\Primary\BankAccount;
+use App\Models\GL\Primary\Bank;
 
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -14,21 +15,23 @@ use Illuminate\Support\Carbon;
 
 use App\Rules\ZeroValidation;
 
-class TaxController extends Controller {
+class BankAccountController extends Controller {
 
     public function loadView(){
 
-        $data['attributes'] = $this->getTaxAttributes(NULL, NULL);
+        $data['bank'] = Bank::all();
+        $data['attributes'] = $this->getBankAccountAttributes(NULL, NULL);
 
-        return view('GL.primary.tax')->with('Tax', $data);
+        return view('GL.primary.bank_account')->with('BA', $data);
     }
 
-    private function getTaxAttributes($process, $request){
+    private function getBankAccountAttributes($process, $request){
 
-        $attributes['tax_id'] = '#Auto#';
-        $attributes['tax_name'] = '';
+        $attributes['ba_id'] = '#Auto#';
+        $attributes['ba_no'] = '';
+        $attributes['branch_name'] = '';
         $attributes['short_name'] = '';
-        $attributes['tax_rate'] = 0;
+        $attributes['bank_id'] = "0";
         $attributes['active'] = 1;
 
         $attributes['validation_messages'] = new MessageBag();;
@@ -41,14 +44,15 @@ class TaxController extends Controller {
 
         if( ($process['validation_result'] == TRUE) && ($process['process_status'] == TRUE)){
 
-            $elqTax = Tax::where('tax_id', $process['tax_id'])->first();
-            if($elqTax->count() >= 1) {
+            $elqBankAccount = BankAccount::where('bank_id', $process['ba_id'])->first();
+            if($elqBankAccount->count() >= 1) {
 
-                $attributes['tax_id'] = $elqTax->tax_id;
-                $attributes['tax_name'] = $elqTax->tax_name;
-                $attributes['short_name'] = $elqTax->short_name;
-                $attributes['tax_rate'] = $elqTax->tax_rate;
-                $attributes['active'] = $elqTax->active;
+                $attributes['ba_id'] = $elqBankAccount->ba_id;
+                $attributes['ba_no'] = $elqBankAccount->ba_no;
+                $attributes['branch_name'] = $elqBankAccount->branch_name;
+                $attributes['short_name'] = $elqBankAccount->short_name;
+                $attributes['bank_id'] = $elqBankAccount->bank_id;
+                $attributes['active'] = $elqBankAccount->active;
             }
 
             $attributes['validation_messages'] = $process['validation_messages'];
@@ -68,10 +72,11 @@ class TaxController extends Controller {
             $inputs = $request->input();
             if(is_null($inputs) == FALSE){
 
-                $attributes['tax_id'] = $inputs['tax_id'];
-                $attributes['tax_name'] = $inputs['tax_name'];
+                $attributes['ba_id'] = $inputs['ba_id'];
+                $attributes['ba_no'] = $inputs['ba_no'];
+                $attributes['branch_name'] = $inputs['branch_name'];
                 $attributes['short_name'] = $inputs['short_name'];
-                $attributes['tax_rate'] = $inputs['tax_rate'];
+                $attributes['bank_id'] = $inputs['bank_id'];
                 $attributes['active'] = $inputs['active'];
             }
 
@@ -84,51 +89,54 @@ class TaxController extends Controller {
         return $attributes;
     }
 
-    public function saveTax(Request $request){
+    public function saveBankAccount(Request $request){
 
         if( $request->submit == 'Reset' ){
 
-            $data['attributes'] = $this->getTaxAttributes(NULL, NULL);
+            $data['attributes'] = $this->getBankAccountAttributes(NULL, NULL);
         }
 
         if( $request->submit == 'Save' ){
 
-            $validation_result = $this->validateTax($request);
+            $validation_result = $this->validateBankAccount($request);
             if($validation_result['validation_result'] == TRUE){
 
-                $process_result = $this->saveTaxInformation($request);
+                $process_result = $this->saveBankAccountInformation($request);
 
                 $process_result['validation_result'] = $validation_result['validation_result'];
                 $process_result['validation_messages'] = $validation_result['validation_messages'];
 
-                $data['attributes'] = $this->getTaxAttributes($process_result, $request);
+                $data['attributes'] = $this->getBankAccountAttributes($process_result, $request);
 
             }else{
 
-                $validation_result['tax_id'] = $request->tax_id;
+                $validation_result['bank_id'] = $request->bank_id;
                 $validation_result['process_status'] = FALSE;
 
-                $data['attributes'] = $this->getTaxAttributes($validation_result, $request);
+                $data['attributes'] = $this->getBankAccountAttributes($validation_result, $request);
             }
         }
 
-        return view('GL.primary.tax')->with('Tax', $data);
+        $data['bank'] = Bank::all();
+        return view('GL.primary.bank_account')->with('BA', $data);
     }
 
-    private function validateTax($request){
+    private function validateBankAccount($request){
 
         //try{
 
-            $inputs['tax_id'] = $request->tax_id;
-            $inputs['tax_name'] = $request->tax_name;
+            $inputs['ba_id'] = $request->ba_id;
+            $inputs['ba_no'] = $request->ba_no;
+            $inputs['branch_name'] = $request->branch_name;
             $inputs['short_name'] = $request->short_name;
-            $inputs['tax_rate'] = $request->tax_rate;
+            $inputs['bank_id'] = $request->bank_id;
             $inputs['active'] = $request->active;
 
-            $rules['tax_id'] = array('required');
-            $rules['tax_name'] = array('required', 'string', 'max:20');
-            $rules['short_name'] = array('required','string','max:10');
-            $rules['tax_rate'] = array('required','numeric','between:0,100.00');
+            $rules['ba_id'] = array('required');
+            $rules['ba_no'] = array('required', 'string', 'max:20');
+            $rules['branch_name'] = array('required','string','max:30');
+            $rules['short_name'] = array('required','string','max:30');
+            $rules['bank_id'] =  array('required','boolean', new ZeroValidation('Bank', $request->bank_id));
             $rules['active'] = array('required','boolean', new ZeroValidation('Active', $request->active));
 
             $front_end_message = '';
@@ -158,61 +166,63 @@ class TaxController extends Controller {
         // }
     }
 
-    private function saveTaxInformation($request){
+    private function saveBankAccountInformation($request){
 
         //try{
 
-            $objTax = new Tax();
+            $objBankAccount = new BankAccount();
 
-            $tax['tax'] = $this->getTaxArray($request);
-            $process_result = $objTax->saveTax($tax);
+            $bank_account['bank_account'] = $this->getBankAccountArray($request);
+            $process_result = $objBankAccount->saveBankAccount($bank_account);
 
             return $process_result;
 
         // }catch(\Exception $e){
 
-        //     $process_result['tax_id'] = $request->tax_id;
+        //     $process_result['ba_id'] = $request->ba_id;
         //     $process_result['process_status'] = FALSE;
         //     $process_result['front_end_message'] = $e->getMessage();
-        //     $process_result['back_end_message'] = 'Tax Controller -> Account Saving Process <br> ' . $e->getLine();
+        //     $process_result['back_end_message'] = 'Bank Account Controller -> Account Saving Process <br> ' . $e->getLine();
 
         //     return $process_result;
         // }
     }
 
-    private function getTaxArray($request){
+    private function getBankAccountArray($request){
 
-        $tax['tax_id'] = $request->tax_id;
-        $tax['tax_name'] = $request->tax_name;
-        $tax['short_name'] = $request->short_name;
-        $tax['tax_rate'] = $request->tax_rate;
-        $tax['active'] = $request->active;
+        $bank_account['ba_id'] = $request->ba_id;
+        $bank_account['ba_no'] = $request->ba_no;
+        $bank_account['branch_name'] = $request->branch_name;
+        $bank_account['short_name'] = $request->short_name;
+        $bank_account['bank_id'] = $request->bank_id;
+        $bank_account['active'] = $request->active;
 
-        if( Tax::where('tax_id', $request->tax_id)->exists() ){
+        if( BankAccount::where('ba_id', $request->ba_id)->exists() ){
 
-            $tax['updated_by'] = Auth::id();
-            $tax['updated_on'] = Carbon::now()->format('Y-m-d H:i:s');
+            $bank_account['updated_by'] = Auth::id();
+            $bank_account['updated_on'] = Carbon::now()->format('Y-m-d H:i:s');
         }else{
 
-            $tax['saved_by'] = Auth::id();
-            $tax['saved_on'] = Carbon::now()->format('Y-m-d H:i:s');
+            $bank_account['saved_by'] = Auth::id();
+            $bank_account['saved_on'] = Carbon::now()->format('Y-m-d H:i:s');
         }
 
-        return $tax;
+        return $bank_account;
     }
 
-    public function openTax(Request $request){
+    public function openBankAccount(Request $request){
 
-        $process_result['tax_id'] = $request->source_id;
+        $process_result['ba_id'] = $request->source_id;
         $process_result['process_status'] = TRUE;
         $process_result['validation_result'] = TRUE;
         $process_result['validation_messages'] =  new MessageBag();
         $process_result['front_end_message'] = '';
         $process_result['back_end_message'] = '';
 
-        $data['attributes'] = $this->getTaxAttributes($process_result, $request);
+        $data['bank'] = Bank::all();
+        $data['attributes'] = $this->getBankAccountAttributes($process_result, $request);
 
-        return view('GL.primary.tax')->with('Tax', $data);
+        return view('GL.primary.bank_account')->with('BA', $data);
     }
 
 

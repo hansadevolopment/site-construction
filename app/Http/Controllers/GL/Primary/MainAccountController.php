@@ -223,19 +223,19 @@ class MainAccountController extends Controller{
 
     }
 
-    public function openItem(Request $request){
+    public function openMainAccount(Request $request){
 
-        // $process_result['ma_id'] = $request->ma_id;
-        // $process_result['process_status'] = TRUE;
-        // $process_result['validation_result'] = TRUE;
-        // $process_result['validation_messages'] =  new MessageBag();
-        // $process_result['front_end_message'] = '';
-        // $process_result['back_end_message'] = '';
+        $process_result['ma_id'] = $request->source_id;
+        $process_result['process_status'] = TRUE;
+        $process_result['validation_result'] = TRUE;
+        $process_result['validation_messages'] =  new MessageBag();
+        $process_result['front_end_message'] = '';
+        $process_result['back_end_message'] = '';
 
-        // $data['attributes'] = $this->getItemAttributes($process_result, $request);
-        // $data['unit'] = Unit::where('active', 1)->get();
+        $data['account_type'] = AccountType::all();
+        $data['attributes'] = $this->getMainAccountAttributes($process_result, $request);
 
-        // return view('SiteMM.Master.item')->with('Item', $data);
+        return view('GL.primary.main_account')->with('MA', $data);
     }
 
 }

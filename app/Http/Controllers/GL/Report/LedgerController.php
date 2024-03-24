@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\GL\Primary\AccType;
-use App\Models\GL\Primary\MainAccount;
+use App\Models\GL\Primary\ControllAccount;
 use App\Models\GL\Primary\SubAccount;
 
 use Illuminate\Support\Facades\Validator;
@@ -23,7 +23,7 @@ class LedgerController extends Controller{
 
     public function loadView(){
 
-        $data['main_account'] = MainAccount::all();
+        $data['controll_account'] = ControllAccount::all();
         $data['sub_account'] = SubAccount::all();
         $data['attributes'] = $this->getLedgerReportAttributes(NULL, NULL);
 
@@ -32,9 +32,10 @@ class LedgerController extends Controller{
 
     public function getLedgerReportAttributes($process, $request){
 
-        $attributes['ma_id'] = 0;
+        $attributes['ca_id'] = 0;
         $attributes['sa_id'] = 0;
         $attributes['ledger_report'] = array();
+        $attributes['ledger_bottom'] = array();
 
         $attributes['validation_messages'] = new MessageBag();;
         $attributes['process_message'] = '';
@@ -47,9 +48,10 @@ class LedgerController extends Controller{
         $input = $request->input();
         if(is_null($input) == FALSE){
 
-            $attributes['ma_id'] = $input['ma_id'];
+            $attributes['ca_id'] = $input['ca_id'];
             $attributes['sa_id'] = $input['sa_id'];
             $attributes['ledger_report'] = array();
+            $attributes['ledger_bottom'] = array();
         }
 
         if( ($process['validation_result'] == TRUE) && ($process['process_status'] == TRUE)){
@@ -77,30 +79,97 @@ class LedgerController extends Controller{
 
     public function generateLedger(Request $request){
 
+        $validation_result = $this->validateLedgerReport($request);
+        if($validation_result['validation_result'] == TRUE ){
 
-        $ledger_result = DB::table('general_ledger')
-                            ->where('sa_id', $request->sa_id)
-                            ->orderBy('gle_date')
-                            ->orderBy('gl_entry_sub_id')
-                            ->orderBy('acc_type')
-                            ->get();
+            $ledger_result = DB::table('general_ledger')->where('sa_id', $request->sa_id)
+                                                    ->orderBy('gle_date')
+                                                    ->orderBy('gl_entry_sub_id')
+                                                    ->orderBy('acc_type')
+                                                    ->get();
 
-        $data['main_account'] = MainAccount::all();
+
+
+            $ledger_bottom['debit_amount'] = $ledger_result->where('acc_type', 1)->sum('amount');
+            $ledger_bottom['credit_amount'] = $ledger_result->where('acc_type', 2)->sum('amount');
+
+            if( $ledger_bottom['debit_amount'] == $ledger_bottom['credit_amount'] ){
+
+                $ledger_bottom['highest_amount'] = $ledger_bottom['debit_amount'];
+                $ledger_bottom['balance_amount'] = 0;
+
+            }elseif( $ledger_bottom['debit_amount'] > $ledger_bottom['credit_amount'] ){
+
+                $ledger_bottom['highest_amount'] = $ledger_bottom['debit_amount'];
+                $ledger_bottom['balance_amount'] = $ledger_bottom['debit_amount'] - $ledger_bottom['credit_amount'];
+
+            }elseif( $ledger_bottom['credit_amount'] > $ledger_bottom['debit_amount'] ){
+
+                $ledger_bottom['highest_amount'] = $ledger_bottom['credit_amount'];
+                $ledger_bottom['balance_amount'] = $ledger_bottom['credit_amount'] - $ledger_bottom['debit_amount'];
+
+            }else{
+
+            }
+
+            $attributes['validation_messages'] = new MessageBag();
+            $attributes['process_message'] = '';
+            $attributes['ca_id'] = $request->ca_id;
+            $attributes['sa_id'] = $request->sa_id;
+            $attributes['ledger_report'] = $ledger_result;
+            $attributes['ledger_bottom'] = $ledger_bottom;
+
+            $data['attributes'] = $attributes;
+
+        }else{
+
+            $validation_result['process_status'] = FALSE;
+
+            $data['attributes'] = $this->getLedgerReportAttributes($validation_result, $request);
+        }
+
+        $data['controll_account'] = ControllAccount::all();
         $data['sub_account'] = SubAccount::all();
 
-
-        $attributes['validation_messages'] = new MessageBag();
-        $attributes['process_message'] = '';
-        $attributes['ma_id'] = $request->ma_id;
-        $attributes['sa_id'] = $request->sa_id;
-        $attributes['ledger_report'] = $ledger_result;
-
-        $data['attributes'] = $attributes;
-
-        //dd( $attributes );
-
         return view('GL.report.ledger')->with('LR', $data);
+    }
 
+
+    private function validateLedgerReport($request){
+
+        //try{
+
+            //$inputs['at_id'] = $request->at_id;
+            $inputs['sa_id'] = $request->sa_id;
+
+            //$rules['at_id'] = array();
+            $rules['sa_id'] = array( new ZeroValidation('Sub Account', $request->sa_id));
+
+            $front_end_message = '';
+
+            $validator = Validator::make($inputs, $rules);
+            $validation_result = $validator->passes();
+            if($validation_result == FALSE){
+
+                $front_end_message = 'Please Check Your Inputs';
+            }
+
+            $process_result['validation_result'] = $validator->passes();
+            $process_result['validation_messages'] =  $validator->errors();
+            $process_result['front_end_message'] = $front_end_message;
+            $process_result['back_end_message'] =  'Ledger Controller - Validation Process ';
+
+            return $process_result;
+
+        // }catch(\Exception $e){
+
+        //     $process_result['validation_result'] = FALSE;
+        //     $process_result['validation_messages'] = new MessageBag();
+        //     $process_result['front_end_message'] =  $e->getMessage();
+        //     $process_result['back_end_message'] =  'Ledger Controller - Validation Function Fault';
+
+		// 	return $process_result;
+        // }
     }
 
 }

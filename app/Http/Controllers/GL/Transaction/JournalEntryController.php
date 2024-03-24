@@ -37,9 +37,9 @@ class JournalEntryController extends Controller{
         $attributes['je_date'] = date('Y-m-d');
         $attributes['gl_post_id'] = '';
         $attributes['remark'] = '';
-        $tmpJournalEntry = DB::table('tmp_journal_entry')->where('saved_by', Auth::user()->id)->orderBy('acc_id')->get();
-        $attributes['total_debit_amount'] = $tmpJournalEntry->where('acc_id', 1)->sum('amount');
-        $attributes['total_credit_amount'] = $tmpJournalEntry->where('acc_id', 2)->sum('amount');
+        $tmpJournalEntry = DB::table('tmp_journal_entry')->where('saved_by', Auth::user()->id)->orderBy('acc_type_id')->get();
+        $attributes['total_debit_amount'] = $tmpJournalEntry->where('acc_type_id', 1)->sum('amount');
+        $attributes['total_credit_amount'] = $tmpJournalEntry->where('acc_type_id', 2)->sum('amount');
         $attributes['je_detail'] = $tmpJournalEntry;
 
         $attributes['validation_messages'] = new MessageBag();;
@@ -56,19 +56,29 @@ class JournalEntryController extends Controller{
             $attributes['je_id'] = $input['je_id'];
             $attributes['je_date'] = $input['je_date'];
             $attributes['remark'] = $input['remark'];
-            $tmpJournalEntry = DB::table('tmp_journal_entry')->where('saved_by', Auth::user()->id)->orderBy('acc_id')->get();
-            $attributes['total_debit_amount'] = $tmpJournalEntry->where('acc_id', 1)->sum('amount');
-            $attributes['total_credit_amount'] = $tmpJournalEntry->where('acc_id', 2)->sum('amount');
+            $tmpJournalEntry = DB::table('tmp_journal_entry')->where('saved_by', Auth::user()->id)->orderBy('acc_type_id')->get();
+            $attributes['total_debit_amount'] = $tmpJournalEntry->where('acc_type_id', 1)->sum('amount');
+            $attributes['total_credit_amount'] = $tmpJournalEntry->where('acc_type_id', 2)->sum('amount');
             $attributes['je_detail'] = $tmpJournalEntry;
         }
 
         if( ($process['validation_result'] == TRUE) && ($process['process_status'] == TRUE)){
 
+
+            if( $request->submit == 'GL Post'){
+
+                $attributes['je_id'] = $process['je_id'];
+                $JournalEntry = DB::table('journal_entry_detail')->where('je_id', $process['je_id'])->orderBy('acc_type_id')->get();
+                $attributes['je_detail'] = $JournalEntry;
+                $attributes['total_debit_amount'] = $JournalEntry->where('acc_type_id', 1)->sum('amount');
+                $attributes['total_credit_amount'] = $JournalEntry->where('acc_type_id', 2)->sum('amount');
+            }
+
             $attributes['process_status'] = TRUE;
 			$attributes['validation_messages'] = new MessageBag();
 
-			$message = $process['front_end_message'];
-			$attributes['process_message'] = '<div class="alert alert-success" role="alert"> '. $message .' </div> ';
+            $message = $process['front_end_message'];
+            $attributes['process_message'] = '<div class="alert alert-success" role="alert"> '. $message .' </div> ';
 
 			return $attributes;
 
@@ -113,7 +123,7 @@ class JournalEntryController extends Controller{
 
         if( $request->submit == 'GL Post'){
 
-            $general_ledger_validation_result = $this->validateGeneralLedgerProcess($request);
+            $general_ledger_validation_result = $this->validateGeneralLedgerPostProcess($request);
             if( $general_ledger_validation_result['validation_result'] == TRUE ){
 
                 $gl_saving_result = $this->postGenralLedger($request);
@@ -189,7 +199,7 @@ class JournalEntryController extends Controller{
         $je_array['description'] = $request->description;
         $je_array['sa_id'] = $request->account;
         $je_array['sa_name'] = SubAccount::where('sa_id', $request->account)->value('sa_name');
-        $je_array['acc_id'] = $request->acc_type;
+        $je_array['acc_type_id'] = $request->acc_type;
         $je_array['amount'] = $request->amount;
         $je_array['saved_by'] = Auth::id();
         $je_array['saved_on'] = now();
@@ -200,7 +210,7 @@ class JournalEntryController extends Controller{
         return $savingResult;
     }
 
-    private function validateGeneralLedgerProcess($request){
+    private function validateGeneralLedgerPostProcess($request){
 
          //try{
 
@@ -255,13 +265,13 @@ class JournalEntryController extends Controller{
 
     private function getJournalEntry($request){
 
-        $tmpJournalEntry = DB::table('tmp_journal_entry')->where('saved_by', Auth::user()->id)->orderBy('acc_id')->get();
+        $tmpJournalEntry = DB::table('tmp_journal_entry')->where('saved_by', Auth::user()->id)->orderBy('acc_type_id')->get();
 
         $journal_entry['je_id'] = $request->je_id;
         $journal_entry['je_date'] = $request->je_date;
         $journal_entry['remark'] = $request->remark;
-        $journal_entry['debit_amount'] = $tmpJournalEntry->where('acc_id', 1)->sum('amount');
-        $journal_entry['credit_amount'] = $tmpJournalEntry->where('acc_id', 2)->sum('amount');
+        $journal_entry['debit_amount'] = $tmpJournalEntry->where('acc_type_id', 1)->sum('amount');
+        $journal_entry['credit_amount'] = $tmpJournalEntry->where('acc_type_id', 2)->sum('amount');
         $journal_entry['saved_by'] = Auth::user()->id;
         $journal_entry['saved_on'] = Carbon::now()->format('Y-m-d H:i:s');
 
@@ -270,14 +280,16 @@ class JournalEntryController extends Controller{
 
     private function getJournalEntryDetail($request){
 
-        $tmpJournalEntry = DB::table('tmp_journal_entry')->where('saved_by', Auth::user()->id)->orderBy('acc_id')->get();
+        $journal_entry_detail = array();
+
+        $tmpJournalEntry = DB::table('tmp_journal_entry')->where('saved_by', Auth::user()->id)->orderBy('acc_type_id')->get();
         foreach($tmpJournalEntry as $rowJE => $valueJE){
 
             $journal_entry_detail[$rowJE]['je_id'] = '';
             $journal_entry_detail[$rowJE]['sa_id'] = $valueJE->sa_id;
             $journal_entry_detail[$rowJE]['sa_name'] = $valueJE->sa_name;
             $journal_entry_detail[$rowJE]['description'] = $valueJE->description;
-            $journal_entry_detail[$rowJE]['acc_type_id'] = $valueJE->acc_id;
+            $journal_entry_detail[$rowJE]['acc_type_id'] = $valueJE->acc_type_id;
             $journal_entry_detail[$rowJE]['amount'] = $valueJE->amount;
         }
 
@@ -286,7 +298,9 @@ class JournalEntryController extends Controller{
 
     private function getGenaralLedgerEntry($request){
 
-        $tmpJournalEntry = DB::table('tmp_journal_entry')->where('saved_by', Auth::user()->id)->orderBy('acc_id')->get();
+        $gl = array();
+
+        $tmpJournalEntry = DB::table('tmp_journal_entry')->where('saved_by', Auth::user()->id)->orderBy('acc_type_id')->get();
         foreach($tmpJournalEntry as $rowJE => $valueJE){
 
             $gl[$rowJE]['gl_entry_id'] = '';
@@ -297,7 +311,7 @@ class JournalEntryController extends Controller{
             $gl[$rowJE]['sa_id'] = $valueJE->sa_id;
             $gl[$rowJE]['sa_name'] = $valueJE->sa_name;
             $gl[$rowJE]['description'] = $valueJE->description;
-            $gl[$rowJE]['acc_type'] = $valueJE->acc_id;
+            $gl[$rowJE]['acc_type'] = $valueJE->acc_type_id;
             $gl[$rowJE]['amount'] = $valueJE->amount;
         }
 
@@ -314,9 +328,10 @@ class JournalEntryController extends Controller{
         $attributes['je_id'] = '#Auto#';
         $attributes['je_date'] = date('Y-m-d');
         $attributes['remark'] = '';
-        $tmpJournalEntry = DB::table('tmp_journal_entry')->where('saved_by', Auth::user()->id)->orderBy('acc_id')->get();
-        $attributes['total_debit_amount'] = $tmpJournalEntry->where('acc_id', 1)->sum('amount');
-        $attributes['total_credit_amount'] = $tmpJournalEntry->where('acc_id', 2)->sum('amount');
+        $attributes['gl_post_id'] = '';
+        $tmpJournalEntry = DB::table('tmp_journal_entry')->where('saved_by', Auth::user()->id)->orderBy('acc_type_id')->get();
+        $attributes['total_debit_amount'] = $tmpJournalEntry->where('acc_type_id', 1)->sum('amount');
+        $attributes['total_credit_amount'] = $tmpJournalEntry->where('acc_type_id', 2)->sum('amount');
         $attributes['je_detail'] = $tmpJournalEntry;
 
         $attributes['process_status'] = TRUE;

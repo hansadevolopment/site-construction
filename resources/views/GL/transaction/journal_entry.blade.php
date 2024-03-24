@@ -175,13 +175,15 @@
                                             <tr style="font-family: Consolas; font-size: 14px;">
                                                 <td style="width: 10%;">{{$row->sa_id}}</td>
                                                 <td style="width: 60%;">{{$row->sa_name}} <br> {{$row->description}}</td>
-                                                @if($row->acc_id == 1)
+                                                @if($row->acc_type_id == 1)
                                                     <td style="width: 10%;">Debit</td>
                                                 @else
                                                     <td style="width: 10%;">Credit</td>
                                                 @endif
                                                 <td style="width: 20%; text-align: right;"> @money($row->amount)</td>
-                                                <td><input type="button" name="remove" id="remove" data-id="{{$row->tmp_je_id}}" class="btn btn-danger btn-sm remove-tmp-je" style="width: 100%;" value="Remove"></td>
+                                                @if($JE['attributes']['je_id'] == '#Auto#')
+                                                    <td><input type="button" name="remove" id="remove" data-id="{{$row->tmp_je_id}}" class="btn btn-danger btn-sm remove-tmp-je" style="width: 100%;" value="Remove"></td>
+                                                @endif
                                             </tr>
 
                                         @endforeach
@@ -214,9 +216,13 @@
                         <div class="row mb-4">
 
                             <label for="tid" class="col-sm-8 col-form-label-sm"></label>
-                            <div class="col-sm-2">
-                                <input type="submit" name="submit" id="glPost" class="btn btn-primary btn-sm" style="width: 100%;" value="GL Post">
-                            </div>
+                            @if($JE['attributes']['je_id'] == '#Auto#')
+                                <div class="col-sm-2">
+                                    <input type="submit" name="submit" id="glPost" class="btn btn-primary btn-sm" style="width: 100%;" value="GL Post">
+                                </div>
+                            @else
+                                <label for="tid" class="col-sm-2 col-form-label-sm"></label>
+                            @endif
                             <div class="col-sm-2">
                                 <input type="submit" name="submit" id="reset" class="btn btn-primary btn-sm" style="width: 100%;" value="Reset">
                             </div>

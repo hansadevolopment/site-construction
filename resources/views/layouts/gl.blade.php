@@ -31,6 +31,7 @@
                             <ul class="dropdown-menu dropdown-single-menu-content">
                                 <li><a href={{route('tax')}}>Tax</a></li>
                                 <li><a href={{route('bank')}}>Bank </a></li>
+                                <li><a href={{route('bank_account')}}>Bank Accounts </a></li>
                                 <li><a href={{route('main_account')}}>Main Accounts</a></li>
                                 <li><a href={{route('controll_account')}}>Controll Accounts</a></li>
                                 <li><a href={{route('sub_account')}}>Sub Accounts</a></li>
@@ -42,7 +43,6 @@
                             </a>
                             <ul class="dropdown-menu dropdown-single-menu-content">
                                 <li><a href={{route('journal_entry')}}>Journal Entry</a></li>
-                                <li><a href={{route('pettycash')}}>Sub Task</a></li>
                             </ul>
                         </li>
                         <li class="nav-item dropdown">
@@ -59,10 +59,11 @@
                                 Report
                             </a>
                             <ul class="dropdown-menu dropdown-single-menu-content">
-                                <li><a href={{route('sap_report')}}>Chart of Account</a></li>
+                                <li><a href={{route('chart_of_account')}}>Chart of Account</a></li>
                                 <li><a href={{route('ledger')}}>General Ledger</a></li>
-                                <li><a href={{route('so_summary_report')}}>Profit & Loss Account</a></li>
-                                <li><a href={{route('so_summary_report')}}>Balance Sheet</a></li>
+                                <li><a href={{route('trial_balance')}}>Trial Balance</a></li>
+                                <li><a href={{route('profit_loss_account')}}>Profit & Loss Account</a></li>
+                                <li><a href={{route('balance_sheet')}}>Balance Sheet</a></li>
                             </ul>
                         </li>
                     </ul>

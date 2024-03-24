@@ -7,13 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Support\Facades\DB;
 
-class Tax extends Model {
+class BankAccount extends Model {
 
     use HasFactory;
 
-    protected $table = 'tax';
+    protected $table = 'bank_account';
 
-    protected $primaryKey = 'tax_id';
+    protected $primaryKey = 'ba_id';
 
     public $incrementing = true;
 
@@ -21,30 +21,30 @@ class Tax extends Model {
 
     protected $dateFormat = 'U';
 
-    public function saveTax($data){
+    public function saveBankAccount($data){
 
-        $tax = $data['tax'];
+        $bank_account = $data['bank_account'];
 
         DB::beginTransaction();
 
         //try{
 
-            $exists_result = Tax::where('tax_id', $tax['tax_id'])->exists();
+            $exists_result = BankAccount::where('ba_id', $bank_account['ba_id'])->exists();
             if( $exists_result ){
 
-               $tax_id = $tax['tax_id'];
-               DB::table('tax')->where('tax_id', $tax_id)->update($tax);
+               $ba_id = $bank_account['ba_id'];
+               DB::table('bank_account')->where('ba_id', $ba_id)->update($bank_account);
 
             }else{
 
-                unset($tax['tax_id']);
-                DB::table('tax')->insert($tax);
-                $tax_id = DB::getPdo()->lastInsertId();
+                unset($bank_account['ba_id']);
+                DB::table('bank_account')->insert($bank_account);
+                $ba_id = DB::getPdo()->lastInsertId();
             }
 
             DB::commit();
 
-            $process_result['tax_id'] = $tax_id;
+            $process_result['ba_id'] = $ba_id;
             $process_result['process_status'] = TRUE;
             $process_result['front_end_message'] = "Saving Process is Completed successfully.";
             $process_result['back_end_message'] = "Commited.";
@@ -55,13 +55,15 @@ class Tax extends Model {
 
         //     DB::rollback();
 
-        //     $process_result['tax_id'] = $tax_id;
+        //     $process_result['ba_id'] = $ba_id;
         //     $process_result['process_status'] = FALSE;
         //     $process_result['front_end_message'] = $e->getMessage();
-        //     $process_result['back_end_message'] = 'Tax <br> ' . $e->getLine();
+        //     $process_result['back_end_message'] = 'bank_account <br> ' . $e->getLine();
 
         //     return $process_result;
         // }
     }
+
+
 
 }

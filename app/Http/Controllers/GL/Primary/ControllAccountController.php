@@ -222,19 +222,19 @@ class ControllAccountController extends Controller {
 
     }
 
-    public function openItem(Request $request){
+    public function openControllAccount(Request $request){
 
-        // $process_result['ma_id'] = $request->ma_id;
-        // $process_result['process_status'] = TRUE;
-        // $process_result['validation_result'] = TRUE;
-        // $process_result['validation_messages'] =  new MessageBag();
-        // $process_result['front_end_message'] = '';
-        // $process_result['back_end_message'] = '';
+        $process_result['ca_id'] = $request->source_id;
+        $process_result['process_status'] = TRUE;
+        $process_result['validation_result'] = TRUE;
+        $process_result['validation_messages'] =  new MessageBag();
+        $process_result['front_end_message'] = '';
+        $process_result['back_end_message'] = '';
 
-        // $data['attributes'] = $this->getItemAttributes($process_result, $request);
-        // $data['unit'] = Unit::where('active', 1)->get();
+        $data['main_account'] = MainAccount::all();
+        $data['attributes'] = $this->getControllAccountAttributes($process_result, $request);
 
-        // return view('SiteMM.Master.item')->with('Item', $data);
+        return view('GL.primary.controll_account')->with('CA', $data);
     }
 
 }

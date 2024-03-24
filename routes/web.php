@@ -48,8 +48,9 @@ use App\Http\Controllers\SiteMM\Report\SiteOperationReportController;
 
 /*------------------------------------------------------------- Genaral Ledger Module -------------------------------------------------------------*/
 
-use App\Http\Controllers\GL\Primary\BankController;
 use App\Http\Controllers\GL\Primary\TaxController;
+use App\Http\Controllers\GL\Primary\BankController;
+use App\Http\Controllers\GL\Primary\BankAccountController;
 use App\Http\Controllers\GL\Primary\MainAccountController;
 use App\Http\Controllers\GL\Primary\ControllAccountController;
 use App\Http\Controllers\GL\Primary\SubAccountController;
@@ -60,6 +61,7 @@ use App\Http\Controllers\GL\Transaction\PettyCashController;
 use App\Http\Controllers\GL\ListInquiry\PrimaryListInquireController;
 use App\Http\Controllers\GL\ListInquiry\TransactionListInquireController;
 
+use App\Http\Controllers\GL\Report\ChartOfAccountController;
 use App\Http\Controllers\GL\Report\TrialBalanceController;
 use App\Http\Controllers\GL\Report\LedgerController;
 use App\Http\Controllers\GL\Report\ProfitLostReportController;
@@ -227,25 +229,29 @@ Route::post('/so_summary_report_process', [SiteOperationReportController::class,
 
 /*------------------------------------------------------------- Primary -------------------------------------------------------------*/
 
-Route::get('/main_account', [MainAccountController::class, 'loadView'])->name('main_account');
-Route::post('/main_account_process', [MainAccountController::class, 'saveMainAccount'])->name('main_account_process');
-Route::get('/open_main_account', [MainAccountController::class, 'openMainAccount'])->name('open_main_account');
-
-Route::get('/controll_account', [ControllAccountController::class, 'loadView'])->name('controll_account');
-Route::post('/controll_account_process', [ControllAccountController::class, 'saveControllAccount'])->name('controll_account_process');
-Route::get('/open_controll_account', [ControllAccountController::class, 'openControllAccount'])->name('open_controll_account');
-
-Route::get('/sub_account', [SubAccountController::class, 'loadView'])->name('sub_account');
-Route::post('/sub_account_process', [SubAccountController::class, 'saveSubAccount'])->name('sub_account_process');
-Route::get('/open_sub_account', [SubAccountController::class, 'openSubAccount'])->name('open_sub_account');
-
 Route::get('/tax', [TaxController::class, 'loadView'])->name('tax');
 Route::post('/tax_process', [TaxController::class, 'saveTax'])->name('tax_process');
-Route::get('/open_tax', [TaxController::class, 'openTax'])->name('open_tax');
+Route::post('/open_tax', [TaxController::class, 'openTax'])->name('open_tax');
 
 Route::get('/bank', [BankController::class, 'loadView'])->name('bank');
 Route::post('/bank_process', [BankController::class, 'saveBank'])->name('bank_process');
-Route::get('/open_bank', [BankController::class, 'openBank'])->name('open_bank');
+Route::post('/open_bank', [BankController::class, 'openBank'])->name('open_bank');
+
+Route::get('/bank_account', [BankAccountController::class, 'loadView'])->name('bank_account');
+Route::post('/bank_account_process', [BankAccountController::class, 'saveBankAccount'])->name('bank_account_process');
+Route::post('/open_bank_account', [BankAccountController::class, 'openBankAccount'])->name('open_bank_account');
+
+Route::get('/main_account', [MainAccountController::class, 'loadView'])->name('main_account');
+Route::post('/main_account_process', [MainAccountController::class, 'saveMainAccount'])->name('main_account_process');
+Route::post('/open_main_account', [MainAccountController::class, 'openMainAccount'])->name('open_main_account');
+
+Route::get('/controll_account', [ControllAccountController::class, 'loadView'])->name('controll_account');
+Route::post('/controll_account_process', [ControllAccountController::class, 'saveControllAccount'])->name('controll_account_process');
+Route::post('/open_controll_account', [ControllAccountController::class, 'openControllAccount'])->name('open_controll_account');
+
+Route::get('/sub_account', [SubAccountController::class, 'loadView'])->name('sub_account');
+Route::post('/sub_account_process', [SubAccountController::class, 'saveSubAccount'])->name('sub_account_process');
+Route::post('/open_sub_account', [SubAccountController::class, 'openSubAccount'])->name('open_sub_account');
 
 /*------------------------------------------------------------- Transaction -------------------------------------------------------------*/
 
@@ -268,11 +274,14 @@ Route::post('/transaction_inquire_process', [TransactionListInquireController::c
 
 /*------------------------------------------------------------- Report -------------------------------------------------------------*/
 
-Route::get('/trial_balance', [TrialBalanceController::class, 'loadView'])->name('trial_balance');
-Route::post('/trial_balance_process', [TrialBalanceController::class, 'generateTrialBalance'])->name('generate_trial_balance');
+Route::get('/chart_of_account', [ChartOfAccountController::class, 'loadView'])->name('chart_of_account');
+Route::post('/generate_chart_of_account', [ChartOfAccountController::class, 'generateChartOfAccount'])->name('generate_chart_of_account');
 
 Route::get('/ledger', [LedgerController::class, 'loadView'])->name('ledger');
 Route::post('/ledger_process', [LedgerController::class, 'generateLedger'])->name('generate_ledger');
+
+Route::get('/trial_balance', [TrialBalanceController::class, 'loadView'])->name('trial_balance');
+Route::post('/trial_balance_process', [TrialBalanceController::class, 'generateTrialBalance'])->name('generate_trial_balance');
 
 Route::get('/profit_loss_account', [ProfitLostReportController::class, 'loadView'])->name('profit_loss_account');
 Route::post('/profit_loss_account_process', [ProfitLostReportController::class, 'generateProfitLossAccount'])->name('generate_profit_loss_account');
