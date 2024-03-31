@@ -45,6 +45,7 @@ use App\Http\Controllers\SiteMM\InquiryList\SoInquiryController;
 
 use App\Http\Controllers\SiteMM\Report\SapReportController;
 use App\Http\Controllers\SiteMM\Report\SiteOperationReportController;
+use App\Http\Controllers\SiteMM\Report\SiteQuantityReportController;
 
 /*------------------------------------------------------------- Genaral Ledger Module -------------------------------------------------------------*/
 
@@ -98,6 +99,26 @@ Route::get('/dashboard', function () {
 
     return view('SiteMM.site_dashboard');
 })->middleware(['auth'])->name('dashboard');
+
+Route::get('/gl_dashboard', function () {
+
+    return view('GL.gl_dashboard');
+})->middleware(['auth'])->name('gl_dashboard');
+
+Route::get('/sales_dashboard', function () {
+
+    return view('Sales.sales_dashboard');
+})->middleware(['auth'])->name('sales_dashboard');
+
+Route::get('/purchasing_dashboard', function () {
+
+    return view('Purchasing.purchasing_dashboard');
+})->middleware(['auth'])->name('purchasing_dashboard');
+
+Route::get('/inventory_dashboard', function () {
+    return view('Inventory.inventory_dashboard');
+})->middleware(['auth'])->name('inventory_dashboard');
+
 
 
 require __DIR__.'/auth.php';
@@ -220,6 +241,9 @@ Route::post('/sap_report_process', [SapReportController::class, 'sapReport'])->n
 
 Route::get('/so_summary_report', [SiteOperationReportController::class, 'loadView'])->name('so_summary_report');
 Route::post('/so_summary_report_process', [SiteOperationReportController::class, 'soReport'])->name('so_summary_report_process');
+
+Route::get('/sq_report', [SiteQuantityReportController::class, 'loadView'])->name('sq_report');
+Route::post('/sq_report_process', [SiteQuantityReportController::class, 'sqReport'])->name('sq_report_process');
 
 /*
 |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

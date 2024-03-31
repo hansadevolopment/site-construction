@@ -67,6 +67,18 @@
                                 <li><a href={{route('debtor_transaction_report')}}>Transaction Report</a></li>
                             </ul>
                         </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Module
+                            </a>
+                            <ul class="dropdown-menu dropdown-single-menu-content">
+                                <li><a href={{route('dashboard')}}>Construction Module</a></li>
+                                <li><a href={{route('gl_dashboard')}}>GL Module</a></li>
+                                <li><a href={{route('sales_dashboard')}}>Sales Module</a></li>
+                                <li><a href={{route('purchasing_dashboard')}}>Purchasing Module</a></li>
+                                <li><a href={{route('inventory_dashboard')}}>Inventory Module</a></li>
+                            </ul>
+                        </li>
                     </ul>
                 </div>
 

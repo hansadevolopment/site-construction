@@ -896,14 +896,6 @@ class SiteOperationReportController extends Controller {
                     $sheet->getStyle($cell_range)->applyFromArray($style_one);
                     $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
 
-                    $task_subtask_label = '';
-                    $sub_task_name = '';
-                    if( $meterial_key == 0 ){
-
-                        $task_subtask_label = ($taskKey+1) . '.' . ($subtaskKey+1);
-                        $sub_task_name = $subtaskValue->sub_task_name;
-                    }
-
                     $cell_range = 'B'.$rowInc_3.':B'.$rowInc_4;
                     $sheet->mergeCells($cell_range);
                     $sheet->setCellValue('B'.$rowInc_3, '');
@@ -1043,6 +1035,14 @@ class SiteOperationReportController extends Controller {
                         $sheet->setCellValue('A'.$rowInc_3, '');
                         $sheet->getStyle($cell_range)->applyFromArray($style_one);
                         $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+
+                        $task_subtask_label = '';
+                        $sub_task_name = '';
+                        if( $labour_key == 0 ){
+
+                            $task_subtask_label = ($taskKey+1) . '.' . ($subtaskKey+1);
+                            $sub_task_name = $subtaskValue->sub_task_name;
+                        }
 
                         $cell_range = 'B'.$rowInc_3.':B'.$rowInc_4;
                         $sheet->mergeCells($cell_range);
@@ -1242,7 +1242,14 @@ class SiteOperationReportController extends Controller {
                         $sheet->mergeCells($cell_range);
                         $sheet->setCellValue('A'.$rowInc_3, '');
                         $sheet->getStyle($cell_range)->applyFromArray($style_one);
-                        $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+                        $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);$task_subtask_label = '';
+
+                        $sub_task_name = '';
+                        if( $overhead_cost_key == 0 ){
+
+                            $task_subtask_label = ($taskKey+1) . '.' . ($subtaskKey+1);
+                            $sub_task_name = $subtaskValue->sub_task_name;
+                        }
 
                         $cell_range = 'B'.$rowInc_3.':B'.$rowInc_4;
                         $sheet->mergeCells($cell_range);
