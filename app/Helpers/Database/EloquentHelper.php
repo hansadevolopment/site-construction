@@ -2,6 +2,8 @@
 
 namespace App\Helpers\Database;
 
+use Illuminate\Database\Eloquent\Collection;
+
 class EloquentHelper{
 
     public static function recordExists($result){
@@ -49,6 +51,61 @@ class EloquentHelper{
                 }
             }
         }
+    }
+
+    public static function recordsExists($result){
+
+        if( is_null($result)) {
+            return FALSE;
+        }
+
+        $data_type = gettype($result);
+        if($data_type == 'array'){
+
+            if( count($result) >= 1 ){
+
+                return TRUE;
+
+            }else{
+
+                return FALSE;
+            }
+        }
+
+        if($data_type == 'object'){
+
+            if( empty($result) ){
+
+                return FALSE;
+
+            }else{
+
+                if( get_class($result) == "Illuminate\Support\Collection" ){
+
+                    if( $result->count() >= 1 ){
+
+                        return TRUE;
+                    }else{
+
+                        return FALSE;
+                    }
+                }
+
+                if( get_class($result) == "Illuminate\Database\Eloquent\Collection" ){
+
+                    if( $result->count() >= 1 ){
+
+                        return TRUE;
+                    }else{
+
+                        return FALSE;
+                    }
+                }
+
+                return FALSE;
+            }
+        }
+
     }
 
 }

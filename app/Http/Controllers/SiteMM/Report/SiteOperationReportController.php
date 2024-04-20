@@ -18,7 +18,6 @@ use App\Models\SiteMM\SiteOperation\EmployeeSalary;
 use App\Services\SiteMM\SiteOperation\MaterialService;
 use App\Services\SiteMM\SiteOperation\LabourService;
 use App\Services\SiteMM\SiteOperation\OverheadCostService;
-use App\Helpers\Database\EloquentHelper;
 
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\MessageBag;
@@ -810,7 +809,7 @@ class SiteOperationReportController extends Controller {
                 // Get Meterials
                 $objMaterialService = new MaterialService();
                 $meterial_result = $objMaterialService->getMaterialDetail($site_id, $task_id, $sub_task_id);
-                if( EloquentHelper::recordExists($meterial_result) ){
+                if( $meterial_result ){
 
                     foreach($meterial_result as $meterial_key => $meterial_value){
 
@@ -1026,7 +1025,7 @@ class SiteOperationReportController extends Controller {
                 // Get Labours
                 $objLabourService = new LabourService();
                 $labour_result = $objLabourService->getLabourDetail($site_id, $task_id, $sub_task_id);
-                if( EloquentHelper::recordExists($labour_result) ){
+                if( $labour_result ){
 
                     foreach($labour_result as $labour_key => $labour_value){
 
@@ -1234,7 +1233,7 @@ class SiteOperationReportController extends Controller {
                 // Get Overhead Cost
                 $objOverheadCostService = new OverheadCostService();
                 $overhead_cost_result = $objOverheadCostService->getOverheadCostDetail($site_id, $task_id, $sub_task_id);
-                if( EloquentHelper::recordExists($overhead_cost_result) ){
+                if( $overhead_cost_result ){
 
                     foreach($overhead_cost_result as $overhead_cost_key => $overhead_cost_value){
 

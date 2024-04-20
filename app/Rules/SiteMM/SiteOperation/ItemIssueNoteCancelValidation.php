@@ -28,16 +28,11 @@ class ItemIssueNoteCancelValidation implements Rule {
             }else{
 
                 $result = DB::table('item_issue_note')->where('iin_id', $value)->value('cancel');
-                if( EloquentHelper::recordExists($result) ){
+                if( $result ){
 
-                    if($result == TRUE){
+                    $this->return_message = 'This Item issue note is Cancelled.';
+                    return FALSE;
 
-                        $this->return_message = 'This Item issue note is Cancelled.';
-                        return FALSE;
-                    }else{
-
-                        return TRUE;
-                    }
                 }else{
 
                     return TRUE;
@@ -45,7 +40,6 @@ class ItemIssueNoteCancelValidation implements Rule {
             }
 
         }else{
-
 
             if( $value == '#Auto#'){
 
@@ -55,17 +49,11 @@ class ItemIssueNoteCancelValidation implements Rule {
             }else{
 
                 $result = DB::table('item_issue_note')->where('iin_id', $value)->value('cancel');
-                if( EloquentHelper::recordExists($result) ){
+                if( $result ){
 
-                    if($result == TRUE){
+                    $this->return_message = 'This record is already cancelled.';
+                    return FALSE;
 
-                        $this->return_message = 'This record is already cancelled.';
-                        return FALSE;
-
-                    }else{
-
-                        return TRUE;
-                    }
                 }else{
 
                     return TRUE;

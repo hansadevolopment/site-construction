@@ -14,25 +14,15 @@ class QuantityValidation implements Rule {
 
     public function passes($attribute, $value){
 
-        if(is_numeric($value)){
+        if( (preg_match('/^\d+(\.\d{1,3})?$/', $value)) && ($value != 0) ){
 
-            if($value > 0){
+            return TRUE;
 
-                return TRUE;
+        }else{
 
-            }else{
+            return FALSE;
+        }
 
-                $this->message = 'The Amount must be grater than zero value.';
-                return FALSE;
-            }
-
-			return TRUE;
-
-		}else{
-
-			$this->message = 'The Amount must be Numeric';
-			return FALSE;
-		}
     }
 
     public function message(){

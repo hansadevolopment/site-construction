@@ -5,7 +5,6 @@ namespace App\Rules\SiteMM\SiteOperation;
 use Illuminate\Contracts\Validation\Rule;
 
 use Illuminate\Support\Facades\DB;
-use App\Helpers\Database\EloquentHelper;
 
 class PaymentVoucherCancelValidation implements Rule {
 
@@ -28,16 +27,10 @@ class PaymentVoucherCancelValidation implements Rule {
             }else{
 
                 $result = DB::table('payment_voucher')->where('pv_id', $value)->value('cancel');
-                if( EloquentHelper::recordExists($result) ){
+                if( $result ){
 
-                    if($result == TRUE){
-
-                        $this->return_message = 'This payment voucher is Cancelled.';
-                        return FALSE;
-                    }else{
-
-                        return TRUE;
-                    }
+                    $this->return_message = 'This payment voucher is Cancelled.';
+                    return FALSE;
                 }else{
 
                     return TRUE;
@@ -55,23 +48,16 @@ class PaymentVoucherCancelValidation implements Rule {
             }else{
 
                 $result = DB::table('payment_voucher')->where('pv_id', $value)->value('cancel');
-                if( EloquentHelper::recordExists($result) ){
+                if( $result ){
 
-                    if($result == TRUE){
+                    $this->return_message = 'This record is already cancelled.';
+                    return FALSE;
 
-                        $this->return_message = 'This record is already cancelled.';
-                        return FALSE;
-
-                    }else{
-
-                        return TRUE;
-                    }
                 }else{
 
                     return TRUE;
                 }
             }
-
         }
 
     }

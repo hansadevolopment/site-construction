@@ -15,7 +15,7 @@ class MaterialService{
                                             inner join item_issue_note_detail iid on iin.iin_id = iid.iin_id
                                             inner join item i on iid.item_id = i.item_id
                                             inner join unit u on i.unit_id = u.unit_id
-                            where		cancel = 0 && site_id = ? && task_id = ?
+                            where		cancel = 0 && site_id = ?
                             order by	iin_date, i.item_name  ";
 
 		    $result = DB::select($sql_query, [$site_id]);
@@ -49,6 +49,21 @@ class MaterialService{
         }
 
 		return $result;
+    }
+
+    public static function getMaterialDetailItemWise($site_id, $task_id, $sub_task_id, $item_id){
+
+        $item_quantity = DB::table('item_issue_note')
+                                ->join('item_issue_note_detail', 'item_issue_note.iin_id', 'item_issue_note_detail.iin_id' )
+                                ->where('cancel', 0)
+                                ->where('site_id', $item_id)
+                                ->where('task_id', $task_id)
+                                ->where('sub_task_id', $sub_task_id)
+                                ->where('item_id', $item_id)
+                                ->groupBy('item_issue_note_detail.item_id')
+                                ->sum('item_issue_note_detail.quantity');
+		return $item_quantity;
+
     }
 
 }

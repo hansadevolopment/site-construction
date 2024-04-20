@@ -5,7 +5,6 @@ namespace App\Rules\SiteMM\SiteOperation;
 use Illuminate\Contracts\Validation\Rule;
 
 use Illuminate\Support\Facades\DB;
-use App\Helpers\Database\EloquentHelper;
 
 class DprCancelValidation implements Rule {
 
@@ -28,16 +27,11 @@ class DprCancelValidation implements Rule {
             }else{
 
                 $result = DB::table('dpr')->where('dpr_id', $value)->value('cancel');
-                if( EloquentHelper::recordExists($result) ){
+                if( $result ){
 
-                    if($result == TRUE){
+                    $this->return_message = 'This daily progress note is Cancelled.';
+                    return FALSE;
 
-                        $this->return_message = 'This daily progress note is Cancelled.';
-                        return FALSE;
-                    }else{
-
-                        return TRUE;
-                    }
                 }else{
 
                     return TRUE;
@@ -45,7 +39,6 @@ class DprCancelValidation implements Rule {
             }
 
         }else{
-
 
             if( $value == '#Auto#'){
 
@@ -55,23 +48,16 @@ class DprCancelValidation implements Rule {
             }else{
 
                 $result = DB::table('dpr')->where('dpr_id', $value)->value('cancel');
-                if( EloquentHelper::recordExists($result) ){
+                if( $result ){
 
-                    if($result == TRUE){
+                    $this->return_message = 'This record is already cancelled.';
+                    return FALSE;
 
-                        $this->return_message = 'This record is already cancelled.';
-                        return FALSE;
-
-                    }else{
-
-                        return TRUE;
-                    }
                 }else{
 
                     return TRUE;
                 }
             }
-
         }
     }
 

@@ -3,17 +3,19 @@
 namespace App\Http\Controllers\SiteMM\Report;
 
 use App\Http\Controllers\Controller;
+
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\MessageBag;
 
 use App\Models\SiteMM\Master\Site;
+use App\Models\SiteMM\Master\Item;
 use App\Models\SiteMM\SiteForcast\SiteMaterials;
-use App\Models\SiteMM\SiteForcast\SiteLabour;
-use App\Models\SiteMM\SiteForcast\SiteOverheadCost;
-use App\Models\SiteMM\SiteForcast\SiteProfit;
+use App\Services\SiteMM\SiteOperation\MaterialService;
+use App\Services\SiteMM\SiteOperation\DprService;
+use App\Services\SiteMM\SiteForcast\SapMaterialService;
 
-use Illuminate\Support\Facades\Validator;
-
-use Illuminate\Support\MessageBag;
+use App\Helpers\Database\EloquentHelper;
 
 use App\Rules\ZeroValidation;
 
@@ -53,7 +55,7 @@ class SiteQuantityReportController extends Controller {
         $site_validation_result = $this->validateReport($request);
         if($site_validation_result['validation_result'] == TRUE){
 
-            $this->prepareSummaryReport($request);
+            $this->prepareQuantityReport($request);
 
         }else{
 
@@ -104,7 +106,7 @@ class SiteQuantityReportController extends Controller {
     }
 
 
-    private function prepareSummaryReport($request){
+    private function prepareQuantityReport($request){
 
         $site_id = $request->site_id;
         $task_id = 0;
@@ -148,10 +150,10 @@ class SiteQuantityReportController extends Controller {
 			),
 		);
 
-		$sheet->mergeCells('A1:AB3');
-		$sheet->getStyle('A1:AB3')->applyFromArray($style);
-		$sheet->getStyle('A1:AB3')->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('A1:AB3')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
+		$sheet->mergeCells('A1:Z3');
+		$sheet->getStyle('A1:Z3')->applyFromArray($style);
+		$sheet->getStyle('A1:Z3')->getBorders()->applyFromArray($border_styleArray);
+		$sheet->getStyle('A1:Z3')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
         $sheet->setCellValue('A1', $elqSite->site_name);
 
         $style= array(
@@ -166,92 +168,52 @@ class SiteQuantityReportController extends Controller {
             ],
 		);
 
-        $sheet->mergeCells('A4:A6');
-        $sheet->getStyle('A4:A6')->applyFromArray($style);
-		$sheet->getStyle('A4:A6')->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('A4:A6')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
+        $sheet->mergeCells('A4:A5');
+        $sheet->getStyle('A4:A5')->applyFromArray($style);
+		$sheet->getStyle('A4:A5')->getBorders()->applyFromArray($border_styleArray);
+		$sheet->getStyle('A4:A5')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
         $sheet->setCellValue('A4', '#');
 
-        $sheet->mergeCells('B4:J6');
-        $sheet->getStyle('B4:J6')->applyFromArray($style);
-		$sheet->getStyle('B4:J6')->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('B4:J6')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
+        $sheet->mergeCells('B4:J5');
+        $sheet->getStyle('B4:J5')->applyFromArray($style);
+		$sheet->getStyle('B4:J5')->getBorders()->applyFromArray($border_styleArray);
+		$sheet->getStyle('B4:J5')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
         $sheet->setCellValue('B4', 'Task \ Sub Task');
 
-        $sheet->mergeCells('K4:R4');
-        $sheet->getStyle('K4:R4')->applyFromArray($style);
-		$sheet->getStyle('K4:R4')->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('K4:R4')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('K4', 'Budget');
+        $sheet->mergeCells('K4:R5');
+        $sheet->getStyle('K4:R5')->applyFromArray($style);
+		$sheet->getStyle('K4:R5')->getBorders()->applyFromArray($border_styleArray);
+		$sheet->getStyle('K4:R5')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
+        $sheet->setCellValue('K4', "Item");
+        $sheet->getStyle('K4')->getAlignment()->setWrapText(true);
 
-        $sheet->mergeCells('S4:AB4');
-        $sheet->getStyle('S4:AB4')->applyFromArray($style);
-		$sheet->getStyle('S4:AB4')->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('S4:AB4')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('S4', 'Operational');
+        $sheet->mergeCells('S4:T5');
+        $sheet->getStyle('S4:T5')->applyFromArray($style);
+		$sheet->getStyle('S4:T5')->getBorders()->applyFromArray($border_styleArray);
+		$sheet->getStyle('S4:T5')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
+        $sheet->setCellValue('S4', "Budget\nQty");
+        $sheet->getStyle('S4')->getAlignment()->setWrapText(true);
 
-        $sheet->mergeCells('K5:L6');
-        $sheet->getStyle('K5:L6')->applyFromArray($style);
-		$sheet->getStyle('K5:L6')->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('K5:L6')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('K5', "Material\nCost");
-        $sheet->getStyle('K5')->getAlignment()->setWrapText(true);
+        $sheet->mergeCells('U4:V5');
+        $sheet->getStyle('U4:V5')->applyFromArray($style);
+		$sheet->getStyle('U4:V5')->getBorders()->applyFromArray($border_styleArray);
+		$sheet->getStyle('U4:V5')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
+        $sheet->setCellValue('U4', "Issue\nQty");
+        $sheet->getStyle('U4')->getAlignment()->setWrapText(true);
 
-        $sheet->mergeCells('M5:N6');
-        $sheet->getStyle('M5:N6')->applyFromArray($style);
-		$sheet->getStyle('M5:N6')->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('M5:N6')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('M5', "Labour\nCost");
-        $sheet->getStyle('M5')->getAlignment()->setWrapText(true);
+        $sheet->mergeCells('W4:X5');
+        $sheet->getStyle('W4:X5')->applyFromArray($style);
+		$sheet->getStyle('W4:X5')->getBorders()->applyFromArray($border_styleArray);
+		$sheet->getStyle('W4:X5')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
+        $sheet->setCellValue('W4', "Used\nQty");
+        $sheet->getStyle('W4')->getAlignment()->setWrapText(true);
 
-        $sheet->mergeCells('O5:P6');
-        $sheet->getStyle('O5:P6')->applyFromArray($style);
-		$sheet->getStyle('O5:P6')->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('O5:P6')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('O5', "Overhead\nCost");
-        $sheet->getStyle('O5')->getAlignment()->setWrapText(true);
-
-        $sheet->mergeCells('Q5:R6');
-        $sheet->getStyle('Q5:R6')->applyFromArray($style);
-		$sheet->getStyle('Q5:R6')->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('Q5:R6')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('Q5', "Total\nCost");
-        $sheet->getStyle('Q5')->getAlignment()->setWrapText(true);
-
-        $sheet->mergeCells('S5:T6');
-        $sheet->getStyle('S5:T6')->applyFromArray($style);
-		$sheet->getStyle('S5:T6')->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('S5:T6')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('S5', "Material\nValue");
-        $sheet->getStyle('S5')->getAlignment()->setWrapText(true);
-
-        $sheet->mergeCells('U5:V6');
-        $sheet->getStyle('U5:V6')->applyFromArray($style);
-		$sheet->getStyle('U5:V6')->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('U5:V6')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('U5', "Labour\nValue");
-        $sheet->getStyle('U5')->getAlignment()->setWrapText(true);
-
-        $sheet->mergeCells('W5:X6');
-        $sheet->getStyle('W5:X6')->applyFromArray($style);
-		$sheet->getStyle('W5:X6')->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('W5:X6')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('W5', "Overhead\nValue");
-        $sheet->getStyle('W5')->getAlignment()->setWrapText(true);
-
-        $sheet->mergeCells('Y5:Z6');
-        $sheet->getStyle('Y5:Z6')->applyFromArray($style);
-		$sheet->getStyle('Y5:Z6')->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('Y5:Z6')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('Y5', "Total\nValue");
-        $sheet->getStyle('Y5')->getAlignment()->setWrapText(true);
-
-        $sheet->mergeCells('AA5:AB6');
-        $sheet->getStyle('AA5:AB6')->applyFromArray($style);
-		$sheet->getStyle('AA5:AB6')->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('AA5:AB6')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('AA5', "Variance\nValue");
-        $sheet->getStyle('AA5')->getAlignment()->setWrapText(true);
+        $sheet->mergeCells('Y4:Z5');
+        $sheet->getStyle('Y4:Z5')->applyFromArray($style);
+		$sheet->getStyle('Y4:Z5')->getBorders()->applyFromArray($border_styleArray);
+		$sheet->getStyle('Y4:Z5')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
+        $sheet->setCellValue('Y4', "Balance\nQty");
+        $sheet->getStyle('Y4')->getAlignment()->setWrapText(true);
 
         // Detail Part
 
@@ -304,16 +266,11 @@ class SiteQuantityReportController extends Controller {
 		);
 
 
-        $elqMeterial = ItemIssueNote::where('site_id', $site_id)->where('cancel', 0)->get();
-        $elqOverheadCost = PaymentVoucher::where('site_id', $site_id)->where('cancel', 0)->get();
-        $elqLabour = EmployeeSalary::select('*')
-                                        ->join('employee_salary_detail', 'employee_salary_detail.es_id', '=', 'employee_salary.es_id')
-                                        ->where('cancel', 0)
-                                        ->where('site_id', $site_id)
-                                        ->get();
+        $elqSapMeterial = SiteMaterials::where('site_id', $site_id)->orderBy('task_id', 'asc')->orderBy('sub_task_id', 'asc')->get();
 
-        $rowInc_1 = 7;
-        $rowInc_2 = 8;
+        $grand_total = 0;
+        $rowInc_1 = 6;
+        $rowInc_2 = 7;
 
         $elqTask = $elqSite->getTask;
         if($request->task_id != '0'){
@@ -338,7 +295,7 @@ class SiteQuantityReportController extends Controller {
             $sheet->getStyle($cell_range)->applyFromArray($style_two);
 		    $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
 
-            $cell_range = 'K'.$rowInc_1.':AB'.$rowInc_2;
+            $cell_range = 'K'.$rowInc_1.':Z'.$rowInc_2;
             $sheet->mergeCells($cell_range);
             $sheet->setCellValue('K'.$rowInc_1, '');
             $sheet->getStyle($cell_range)->applyFromArray($style_one);
@@ -355,188 +312,163 @@ class SiteQuantityReportController extends Controller {
 
                 $sub_task_id = $subtaskValue->sub_task_id;
 
-                $meterial_cost = SiteMaterials::where('site_id', $site_id)->where('task_id', $task_id)->where('sub_task_id', $sub_task_id)->sum('amount');
-                $labour_cost = SiteLabour::where('site_id', $site_id)->where('task_id', $task_id)->where('sub_task_id', $sub_task_id)->sum('amount');
-                $overhead_cost = SiteOverheadCost::where('site_id', $site_id)->where('task_id', $task_id)->where('sub_task_id', $sub_task_id)->sum('amount');
-                $profit_value = SiteProfit::where('site_id', $site_id)->where('task_id', $task_id)->where('sub_task_id', $sub_task_id)->sum('profit_value');
-                $total_cost = $meterial_cost + $labour_cost + $overhead_cost;
-                $total_value = $total_cost + $profit_value;
+                $sub_task_total_material_amount = 0;
+                $sub_task_total_labour_amount = 0;
+                $sub_task_total_overhead_cost_amount = 0;
+                $print_duplicate_flag = FALSE;
 
-                $total_meterial_cost = $total_meterial_cost + $meterial_cost;
-                $total_labour_cost = $total_labour_cost + $labour_cost;
-                $total_overhead_cost = $total_overhead_cost + $overhead_cost;
-                $total_profit_value = $total_profit_value + $profit_value;
-                $grand_cost = $grand_cost + $total_cost;
-                $grand_value = $grand_value + $total_value;
+                // Get Meterials
+                $objSapMaterialService = new SapMaterialService();
+                $sap_meterial_result = $objSapMaterialService->getSapMaterialDetail($site_id, $task_id, $sub_task_id);
 
-                $operational_meterial_value = $elqMeterial->where('task_id', $task_id)->where('sub_task_id', $sub_task_id)->sum('total_amount');
-                $operational_labour_value = $elqLabour->where('task_id', $task_id)->where('sub_task_id', $sub_task_id)->sum('total_amount');
-                $operational_overhead_cost_value = $elqOverheadCost->where('task_id', $task_id)->where('sub_task_id', $sub_task_id)->sum('total_amount');
-                $operational_total_value = $operational_meterial_value + $operational_overhead_cost_value + $operational_labour_value;
-                $operational_variance_value = $total_cost - $operational_total_value;
+                if( EloquentHelper::recordsExists($sap_meterial_result) ){
 
-                $total_operational_meterial_cost = $total_operational_meterial_cost +  $operational_meterial_value;
-                $total_operational_labour_cost = $total_operational_labour_cost + $operational_labour_value;
-                $total_operational_overhead_cost = $total_operational_overhead_cost + $operational_overhead_cost_value;
-                $total_operational_cost = $total_operational_cost + $operational_total_value;
-                $total_operational_variance =  $total_operational_variance + $operational_variance_value;
+                    // Meterials
+                    foreach($sap_meterial_result as $meterial_key => $meterial_value){
 
-                $meterial_cost = number_format($meterial_cost, 2);
-                $labour_cost = number_format($labour_cost, 2);
-                $overhead_cost = number_format($overhead_cost, 2);
-                $total_cost = number_format($total_cost, 2);
-                $total_value = number_format($total_value, 2);
+                        $cell_range = 'A'.$rowInc_3.':A'.$rowInc_4;
+                        $sheet->mergeCells($cell_range);
+                        $sheet->setCellValue('A'.$rowInc_3, '');
+                        $sheet->getStyle($cell_range)->applyFromArray($style_one);
+                        $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
 
-                $operational_meterial_value = number_format($operational_meterial_value, 2);
-                $operational_overhead_cost_value = number_format($operational_overhead_cost_value, 2);
-                $operational_labour_value = number_format($operational_labour_value, 2);
-                $operational_total_value = number_format($operational_total_value, 2);
-                $operational_variance_value = number_format($operational_variance_value, 2);
+                        $task_subtask_label = '';
+                        $sub_task_name = '';
+                        if( $meterial_key == 0 ){
 
-                $cell_range = 'A'.$rowInc_3.':A'.$rowInc_4;
-                $sheet->mergeCells($cell_range);
-                $sheet->setCellValue('A'.$rowInc_3, '');
-                $sheet->getStyle($cell_range)->applyFromArray($style_one);
-                $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+                            $task_subtask_label = ($taskKey+1) . '.' . ($subtaskKey+1);
+                            $sub_task_name = $subtaskValue->sub_task_name;
+                        }
 
-                $cell_range = 'B'.$rowInc_3.':B'.$rowInc_4;
-                $sheet->mergeCells($cell_range);
-                $sheet->setCellValue('B'.$rowInc_3, ($taskKey+1) . '.' . ($subtaskKey+1));
-                $sheet->getStyle($cell_range)->applyFromArray($style_one);
-                $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+                        $cell_range = 'B'.$rowInc_3.':B'.$rowInc_4;
+                        $sheet->mergeCells($cell_range);
+                        $sheet->setCellValue('B'.$rowInc_3, $task_subtask_label);
+                        $sheet->getStyle($cell_range)->applyFromArray($style_one);
+                        $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
 
-                $cell_range = 'C'.$rowInc_3.':J'.$rowInc_4;
-                $sheet->mergeCells($cell_range);
-                $sheet->setCellValue('C'.$rowInc_3, $subtaskValue->sub_task_name);
-                $sheet->getStyle($cell_range)->applyFromArray($style_two);
-                $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+                        $cell_range = 'C'.$rowInc_3.':J'.$rowInc_4;
+                        $sheet->mergeCells($cell_range);
+                        $sheet->setCellValue('C'.$rowInc_3, $sub_task_name);
+                        $sheet->getStyle($cell_range)->applyFromArray($style_two);
+                        $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
 
-                $cell_range = 'K'.$rowInc_3.':L'.$rowInc_4;
-                $sheet->mergeCells($cell_range);
-                $sheet->setCellValue('K'.$rowInc_3, $meterial_cost);
-                $sheet->getStyle($cell_range)->applyFromArray($style_three);
-                $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+                        $item_name = Item::where('item_id', $meterial_value->item_id)->value('item_name');
 
-                $cell_range = 'M'.$rowInc_3.':N'.$rowInc_4;
-                $sheet->mergeCells($cell_range);
-                $sheet->setCellValue('M'.$rowInc_3, $labour_cost);
-                $sheet->getStyle($cell_range)->applyFromArray($style_three);
-                $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+                        $cell_range = 'K'.$rowInc_3.':R'.$rowInc_4;
+                        $sheet->mergeCells($cell_range);
+                        $sheet->setCellValue('K'.$rowInc_3, $item_name);
+                        $sheet->getStyle($cell_range)->applyFromArray($style_two);
+                        $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
 
-                $cell_range = 'O'.$rowInc_3.':P'.$rowInc_4;
-                $sheet->mergeCells($cell_range);
-                $sheet->setCellValue('O'.$rowInc_3, $overhead_cost);
-                $sheet->getStyle($cell_range)->applyFromArray($style_three);
-                $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+                        $cell_range = 'S'.$rowInc_3.':T'.$rowInc_4;
+                        $sheet->mergeCells($cell_range);
+                        $sheet->setCellValue('S'.$rowInc_3, $meterial_value->quantity);
+                        $sheet->getStyle($cell_range)->applyFromArray($style_three);
+                        $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
 
-                $cell_range = 'Q'.$rowInc_3.':R'.$rowInc_4;
-                $sheet->mergeCells($cell_range);
-                $sheet->setCellValue('Q'.$rowInc_3, $total_cost);
-                $sheet->getStyle($cell_range)->applyFromArray($style_three);
-                $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+                        $issued_item = MaterialService::getMaterialDetailItemWise($site_id, $task_id, $sub_task_id, $meterial_value->item_id);
 
-                $cell_range = 'S'.$rowInc_3.':T'.$rowInc_4;
-                $sheet->mergeCells($cell_range);
-                $sheet->setCellValue('S'.$rowInc_3, $operational_meterial_value);
-                $sheet->getStyle($cell_range)->applyFromArray($style_three);
-                $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+                        $cell_range = 'U'.$rowInc_3.':V'.$rowInc_4;
+                        $sheet->mergeCells($cell_range);
+                        $sheet->setCellValue('U'.$rowInc_3, $issued_item);
+                        $sheet->getStyle($cell_range)->applyFromArray($style_three);
+                        $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
 
-                $cell_range = 'U'.$rowInc_3.':V'.$rowInc_4;
-                $sheet->mergeCells($cell_range);
-                $sheet->setCellValue('U'.$rowInc_3, $operational_labour_value);
-                $sheet->getStyle($cell_range)->applyFromArray($style_three);
-                $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+                        $used_quantity = DprService::getDprQuantityItemWise($site_id, $task_id, $sub_task_id, $meterial_value->item_id);
 
-                $cell_range = 'W'.$rowInc_3.':X'.$rowInc_4;
-                $sheet->mergeCells($cell_range);
-                $sheet->setCellValue('W'.$rowInc_3, $operational_overhead_cost_value);
-                $sheet->getStyle($cell_range)->applyFromArray($style_three);
-                $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+                        $cell_range = 'W'.$rowInc_3.':X'.$rowInc_4;
+                        $sheet->mergeCells($cell_range);
+                        $sheet->setCellValue('W'.$rowInc_3, $used_quantity);
+                        $sheet->getStyle($cell_range)->applyFromArray($style_three);
+                        $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
 
-                $cell_range = 'Y'.$rowInc_3.':Z'.$rowInc_4;
-                $sheet->mergeCells($cell_range);
-                $sheet->setCellValue('Y'.$rowInc_3, $operational_total_value);
-                $sheet->getStyle($cell_range)->applyFromArray($style_three);
-                $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+                        $balance_quantity = ($issued_item - $used_quantity);
 
-                $cell_range = 'AA'.$rowInc_3.':AB'.$rowInc_4;
-                $sheet->mergeCells($cell_range);
-                $sheet->setCellValue('AA'.$rowInc_3, $operational_variance_value);
-                $sheet->getStyle($cell_range)->applyFromArray($style_three);
-                $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+                        $cell_range = 'Y'.$rowInc_3.':Z'.$rowInc_4;
+                        $sheet->mergeCells($cell_range);
+                        $sheet->setCellValue('Y'.$rowInc_3, $balance_quantity);
+                        $sheet->getStyle($cell_range)->applyFromArray($style_three);
+                        $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
 
+                        $sub_task_total_material_amount += $meterial_value->amount;
+                        $print_duplicate_flag = TRUE;
 
-                $rowInc_3 = $rowInc_3 + 2;
-                $rowInc_4 = $rowInc_4 + 2;
+                        $rowInc_3 = $rowInc_3 + 2;
+                        $rowInc_4 = $rowInc_4 + 2;
+                    }
+
+                }else{
+
+                }
+
+                if( $print_duplicate_flag == FALSE ){
+
+                    $cell_range = 'A'.$rowInc_3.':A'.$rowInc_4;
+                    $sheet->mergeCells($cell_range);
+                    $sheet->setCellValue('A'.$rowInc_3, '');
+                    $sheet->getStyle($cell_range)->applyFromArray($style_one);
+                    $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+
+                    $task_subtask_label = ($taskKey+1) . '.' . ($subtaskKey+1);
+                    $sub_task_name = $subtaskValue->sub_task_name;
+
+                    $cell_range = 'B'.$rowInc_3.':B'.$rowInc_4;
+                    $sheet->mergeCells($cell_range);
+                    $sheet->setCellValue('B'.$rowInc_3, $task_subtask_label);
+                    $sheet->getStyle($cell_range)->applyFromArray($style_one);
+                    $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+
+                    $cell_range = 'C'.$rowInc_3.':J'.$rowInc_4;
+                    $sheet->mergeCells($cell_range);
+                    $sheet->setCellValue('C'.$rowInc_3, $sub_task_name);
+                    $sheet->getStyle($cell_range)->applyFromArray($style_two);
+                    $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+
+                    $cell_range = 'K'.$rowInc_3.':R'.$rowInc_4;
+                    $sheet->mergeCells($cell_range);
+                    $sheet->setCellValue('K'.$rowInc_3, '');
+                    $sheet->getStyle($cell_range)->applyFromArray($style_two);
+                    $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+
+                    $cell_range = 'S'.$rowInc_3.':T'.$rowInc_4;
+                    $sheet->mergeCells($cell_range);
+                    $sheet->setCellValue('T'.$rowInc_3, '');
+                    $sheet->getStyle($cell_range)->applyFromArray($style_two);
+                    $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+
+                    $cell_range = 'U'.$rowInc_3.':V'.$rowInc_4;
+                    $sheet->mergeCells($cell_range);
+                    $sheet->setCellValue('V'.$rowInc_3, '');
+                    $sheet->getStyle($cell_range)->applyFromArray($style_two);
+                    $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+
+                    $cell_range = 'W'.$rowInc_3.':X'.$rowInc_4;
+                    $sheet->mergeCells($cell_range);
+                    $sheet->setCellValue('W'.$rowInc_3, number_format(0));
+                    $sheet->getStyle($cell_range)->applyFromArray($style_three);
+                    $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+
+                    $cell_range = 'Y'.$rowInc_3.':Z'.$rowInc_4;
+                    $sheet->mergeCells($cell_range);
+                    $sheet->setCellValue('Y'.$rowInc_3, '');
+                    $sheet->getStyle($cell_range)->applyFromArray($style_three);
+                    $sheet->getStyle($cell_range)->getBorders()->applyFromArray($border_styleArray);
+
+                    $rowInc_3 = $rowInc_3 + 2;
+                    $rowInc_4 = $rowInc_4 + 2;
+                    //$print_duplicate_flag = 1;
+                }
+
+                $grand_total = $grand_total + ($sub_task_total_material_amount + $sub_task_total_labour_amount + $sub_task_total_overhead_cost_amount);
+
             }
 
             $rowInc_1 = $rowInc_3;
             $rowInc_2 = $rowInc_4;
         }
 
-        // Total
-        $sheet->mergeCells('A'.$rowInc_1.':J'.$rowInc_2);
-        $sheet->getStyle('A'.$rowInc_1.':J'.$rowInc_2)->applyFromArray($style);
-		$sheet->getStyle('A'.$rowInc_1.':J'.$rowInc_2)->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('A'.$rowInc_1.':J'.$rowInc_2)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('A'.$rowInc_1, 'Total');
-
-        $sheet->mergeCells('K'.$rowInc_1.':L'.$rowInc_2);
-        $sheet->getStyle('K'.$rowInc_1.':L'.$rowInc_2)->applyFromArray($style_four);
-		$sheet->getStyle('K'.$rowInc_1.':L'.$rowInc_2)->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('K'.$rowInc_1.':L'.$rowInc_2)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('K'.$rowInc_1, number_format($total_meterial_cost, 2));
-
-        $sheet->mergeCells('M'.$rowInc_1.':N'.$rowInc_2);
-        $sheet->getStyle('M'.$rowInc_1.':N'.$rowInc_2)->applyFromArray($style_four);
-		$sheet->getStyle('M'.$rowInc_1.':N'.$rowInc_2)->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('M'.$rowInc_1.':N'.$rowInc_2)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('M'.$rowInc_1, number_format($total_labour_cost, 2));
-
-        $sheet->mergeCells('O'.$rowInc_1.':P'.$rowInc_2);
-        $sheet->getStyle('O'.$rowInc_1.':P'.$rowInc_2)->applyFromArray($style_four);
-		$sheet->getStyle('O'.$rowInc_1.':P'.$rowInc_2)->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('O'.$rowInc_1.':P'.$rowInc_2)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('O'.$rowInc_1, number_format($total_overhead_cost, 2));
-
-        $sheet->mergeCells('Q'.$rowInc_1.':R'.$rowInc_2);
-        $sheet->getStyle('Q'.$rowInc_1.':R'.$rowInc_2)->applyFromArray($style_four);
-		$sheet->getStyle('Q'.$rowInc_1.':R'.$rowInc_2)->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('Q'.$rowInc_1.':R'.$rowInc_2)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('Q'.$rowInc_1, number_format($grand_cost, 2));
-
-        $sheet->mergeCells('S'.$rowInc_1.':T'.$rowInc_2);
-        $sheet->getStyle('S'.$rowInc_1.':T'.$rowInc_2)->applyFromArray($style_four);
-		$sheet->getStyle('S'.$rowInc_1.':T'.$rowInc_2)->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('S'.$rowInc_1.':T'.$rowInc_2)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('S'.$rowInc_1, number_format($total_operational_meterial_cost, 2));
-
-        $sheet->mergeCells('U'.$rowInc_1.':V'.$rowInc_2);
-        $sheet->getStyle('U'.$rowInc_1.':V'.$rowInc_2)->applyFromArray($style_four);
-		$sheet->getStyle('U'.$rowInc_1.':V'.$rowInc_2)->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('U'.$rowInc_1.':V'.$rowInc_2)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('U'.$rowInc_1, number_format($total_operational_labour_cost, 2));
-
-        $sheet->mergeCells('W'.$rowInc_1.':X'.$rowInc_2);
-        $sheet->getStyle('W'.$rowInc_1.':X'.$rowInc_2)->applyFromArray($style_four);
-		$sheet->getStyle('W'.$rowInc_1.':X'.$rowInc_2)->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('W'.$rowInc_1.':X'.$rowInc_2)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('W'.$rowInc_1, number_format($total_operational_overhead_cost, 2));
-
-        $sheet->mergeCells('Y'.$rowInc_1.':Z'.$rowInc_2);
-        $sheet->getStyle('Y'.$rowInc_1.':Z'.$rowInc_2)->applyFromArray($style_four);
-		$sheet->getStyle('Y'.$rowInc_1.':Z'.$rowInc_2)->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('Y'.$rowInc_1.':Z'.$rowInc_2)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('Y'.$rowInc_1, number_format($total_operational_cost, 2));
-
-        $sheet->mergeCells('AA'.$rowInc_1.':AB'.$rowInc_2);
-        $sheet->getStyle('AA'.$rowInc_1.':AB'.$rowInc_2)->applyFromArray($style_four);
-		$sheet->getStyle('AA'.$rowInc_1.':AB'.$rowInc_2)->getBorders()->applyFromArray($border_styleArray);
-		$sheet->getStyle('AA'.$rowInc_1.':AB'.$rowInc_2)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF99');
-        $sheet->setCellValue('AA'.$rowInc_1, number_format($total_operational_variance, 2));
-
         $writer = new Xlsx($spreadsheet);
-		$filename = 'Site-Operation-Summary-Report';
+		$filename = 'Site-Operation-Quantity-Report';
 
 		header('Content-Type: application/vnd.ms-excel');
         header('Content-Disposition: attachment;filename="'. $filename .'.xlsx"');
