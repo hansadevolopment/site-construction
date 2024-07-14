@@ -89,6 +89,26 @@ use App\Http\Controllers\Sales\Report\DebtorLedgerController;
 use App\Http\Controllers\Sales\Report\DebtorStatementAgeAnalysisController;
 use App\Http\Controllers\Sales\Report\DebtorTransactionReportController;
 
+/*------------------------------------------------------------- Purchasing Module -------------------------------------------------------------*/
+use App\Http\Controllers\Purchasing\Primary\PurchasingCategoryController;
+use App\Http\Controllers\Purchasing\Primary\PurchasingLocationController;
+use App\Http\Controllers\Purchasing\Primary\CreditorController;
+
+use App\Http\Controllers\Purchasing\Transaction\GoodReceiveNoteController;
+use App\Http\Controllers\Purchasing\Transaction\PaymentVoucherController as PurchasingPayment;
+use App\Http\Controllers\Purchasing\Transaction\PurchaseReturnController;
+use App\Http\Controllers\Purchasing\Transaction\DebitNoteController;
+use App\Http\Controllers\Purchasing\Transaction\PurchaseSettlementController;
+use App\Http\Controllers\Purchasing\Transaction\CustomOrderController as PurchasingCustomOrder;
+
+use App\Http\Controllers\Purchasing\ListInquire\PurchasingPrimaryListInquireController;
+use App\Http\Controllers\Purchasing\ListInquire\PurchasingTransactionListInquireController;
+
+use App\Http\Controllers\Purchasing\Report\CreditorStatementAgeAnalysisController;
+use App\Http\Controllers\Purchasing\Report\CreditorLedgerController;
+
+use App\Http\Controllers\TestController;
+
 
 Route::get('/', function () {
 
@@ -385,3 +405,34 @@ Route::post('/generate_debtor_ledger', [DebtorLedgerController::class, 'generate
 
 Route::get('/debtor_transaction_report', [DebtorTransactionReportController::class, 'loadView'])->name('debtor_transaction_report');
 Route::post('/generate_debtor_transaction_report', [DebtorTransactionReportController::class, 'generateDebtorTransactionReport'])->name('generate_debtor_transaction_report');
+
+/*
+|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Purchaing Module Routes
+|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+*/
+
+/*------------------------------------------------------------- Primary -------------------------------------------------------------*/
+Route::get('/creditor', [CreditorController::class, 'loadView'])->name('creditor');
+Route::post('/creditor_process', [CreditorController::class, 'saveCreditor'])->name('creditor_process');
+Route::get('/open_creditor', [CreditorController::class, 'openCreditor'])->name('open_creditor');
+
+Route::get('/purchasing_category', [PurchasingCategoryController::class, 'loadView'])->name('purchasing_category');
+Route::post('/purchasing_category_process', [PurchasingCategoryController::class, 'savePurchaisngCategory'])->name('purchasing_category_process');
+Route::get('/open_purchasing_category', [PurchasingCategoryController::class, 'openPurchaisngCategory'])->name('open_purchasing_category');
+
+Route::get('/purchasing_location', [PurchasingLocationController::class, 'loadView'])->name('purchasing_location');
+Route::post('/purchasing_location_process', [PurchasingLocationController::class, 'savePurchasingLocation'])->name('purchasing_location_process');
+Route::get('/open_purchasing_location', [PurchasingLocationController::class, 'openPurchasingLocation'])->name('open_purchasing_location');
+
+/*------------------------------------------------------------- Transaction -------------------------------------------------------------*/
+Route::get('/grn', [GoodReceiveNoteController::class, 'loadView'])->name('grn');
+Route::post('/grn_process', [GoodReceiveNoteController::class, 'saveGrn'])->name('grn_process');
+Route::post('/remove_grn_item', [GoodReceiveNoteController::class, 'removeGrnItem'])->name('remove_grn_item');
+Route::get('/open_grn', [GoodReceiveNoteController::class, 'openGrn'])->name('open_grn');
+
+/*------------------------------------------------------------- List Inquire -------------------------------------------------------------*/
+Route::get('/inquire', [PurchasingTransactionListInquireController::class, 'loadView'])->name('inquire');
+Route::post('/inquire_process', [PurchasingTransactionListInquireController::class, 'inquireProcess'])->name('inquire_process');
+
+Route::get('/test', [TestController::class, 'test'])->name('test');

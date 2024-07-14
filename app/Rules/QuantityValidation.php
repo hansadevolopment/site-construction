@@ -20,6 +20,7 @@ class QuantityValidation implements Rule {
 
         }else{
 
+            $this->message = 'Please enter valid quantity';
             return FALSE;
         }
 

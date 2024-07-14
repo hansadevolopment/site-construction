@@ -29,9 +29,9 @@
                                 Primary Data
                             </a>
                             <ul class="dropdown-menu dropdown-single-menu-content">
-                                <li><a href={{route('tax')}}>Creditor</a></li>
-                                <li><a href={{route('bank')}}>Purchasing Category </a></li>
-                                <li><a href={{route('bank_account')}}>Purchasing Location</a></li>
+                                <li><a href={{route('creditor')}}>Creditor</a></li>
+                                <li><a href={{route('purchasing_category')}}>Purchasing Category </a></li>
+                                <li><a href={{route('purchasing_location')}}>Purchasing Location</a></li>
                             </ul>
                         </li>
                         <li class="nav-item dropdown">
@@ -39,7 +39,7 @@
                                Transaction
                             </a>
                             <ul class="dropdown-menu dropdown-single-menu-content">
-                                <li><a href={{route('journal_entry')}}>Good Receive Note</a></li>
+                                <li><a href={{route('grn')}}>Good Receive Note</a></li>
                                 <li><a href={{route('journal_entry')}}>Payment Voucher</a></li>
                                 <li><a href={{route('journal_entry')}}>Purchase Return</a></li>
                                 <li><a href={{route('journal_entry')}}>Debit Note</a></li>
@@ -110,6 +110,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
 
     <!-- scripts -->
-    <script src="{{ asset('js/gl.js') }}" defer></script>
+    <script src="{{ asset('js/purchasing.js') }}" defer></script>
 </body>
 </html>

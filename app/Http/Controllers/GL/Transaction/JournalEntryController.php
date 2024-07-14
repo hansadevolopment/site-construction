@@ -14,9 +14,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
-use App\Helpers\Database\EloquentHelper;
+use Illuminate\Support\Facades\DB;
 
 use App\Rules\ZeroValidation;
 use App\Rules\CurrencyValidation;
@@ -76,7 +75,7 @@ class JournalEntryController extends Controller{
 
                 $attributes['je_id'] = $process['je_id'];
                 $JournalEntry = DB::table('journal_entry')->where('je_id', $process['je_id'])->first();
-                if( EloquentHelper::recordExists($JournalEntry)  ){
+                if( $JournalEntry  ){
 
                     $attributes['je_date'] = $JournalEntry->je_date;
                     $attributes['remark'] = $JournalEntry->remark;
