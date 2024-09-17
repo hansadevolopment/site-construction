@@ -2,6 +2,8 @@
 
 namespace App\Helpers\Database;
 
+use Illuminate\Database\Eloquent\Collection;
+
 class EloquentHelper{
 
     public static function recordExists($result){
@@ -12,7 +14,7 @@ class EloquentHelper{
         }
 
         $data_type = gettype($result);
-        if( ($data_type == 'int') || ($data_type == 'string') || ($data_type == 'float') || ($data_type == 'boolean')){
+        if( ($data_type == 'integer') || ($data_type == 'string') || ($data_type == 'double') || ($data_type == 'boolean')){
 
             return TRUE;
 
@@ -22,7 +24,6 @@ class EloquentHelper{
 
                 if( count($result) >= 1 ){
 
-                    echo 'Array count more than zero' . "\n";
                     return TRUE;
 
                 }else{
@@ -50,6 +51,61 @@ class EloquentHelper{
                 }
             }
         }
+    }
+
+    public static function recordsExists($result){
+
+        if( is_null($result)) {
+            return FALSE;
+        }
+
+        $data_type = gettype($result);
+        if($data_type == 'array'){
+
+            if( count($result) >= 1 ){
+
+                return TRUE;
+
+            }else{
+
+                return FALSE;
+            }
+        }
+
+        if($data_type == 'object'){
+
+            if( empty($result) ){
+
+                return FALSE;
+
+            }else{
+
+                if( get_class($result) == "Illuminate\Support\Collection" ){
+
+                    if( $result->count() >= 1 ){
+
+                        return TRUE;
+                    }else{
+
+                        return FALSE;
+                    }
+                }
+
+                if( get_class($result) == "Illuminate\Database\Eloquent\Collection" ){
+
+                    if( $result->count() >= 1 ){
+
+                        return TRUE;
+                    }else{
+
+                        return FALSE;
+                    }
+                }
+
+                return FALSE;
+            }
+        }
+
     }
 
 }

@@ -23,9 +23,13 @@ class AppServiceProvider extends ServiceProvider
      * @return void
      */
     public function boot(){
-        
+
         Blade::directive('money', function ($amount) {
 			return "<?php echo number_format($amount, 2); ?>";
+		});
+
+        Blade::directive('quantity', function ($amount) {
+			return "<?php echo number_format($amount, 3); ?>";
 		});
 
         date_default_timezone_set('Asia/Colombo');

@@ -82,10 +82,11 @@ class ItemIssueNoteController extends Controller {
 
             $attributes['validation_messages'] = $process['validation_messages'];
 
-            if($request->submit == 'Display'){
+            if($request->submit == 'Cancel'){
 
-                $attributes['validation_messages'] = new MessageBag();
-                $attributes['process_message'] = "";
+                $message = $process['front_end_message'] .' <br> ' . $process['back_end_message'];
+                $attributes['process_message'] = '<div class="alert alert-danger" role="alert"> '. $message .' </div> ';
+
             }else{
 
                 $message = $process['front_end_message'] .' <br> ' . $process['back_end_message'];
@@ -197,7 +198,7 @@ class ItemIssueNoteController extends Controller {
             $inputs['price'] = InputHelper::currencyToNumber($request->price);
             $inputs['quantity'] = $request->quantity;
 
-            $rules['iin_id'] = array('required', new ItemIssueNoteCancelValidation('New'));
+            $rules['iin_id'] = array('required', new ItemIssueNoteCancelValidation('save'));
             $rules['iin_date'] = array('required', 'date');
             $rules['site_id'] = array( new ZeroValidation('Site', $request->site_id));
             $rules['task_id'] = array( new ZeroValidation('Task', $request->task_id));
@@ -212,7 +213,7 @@ class ItemIssueNoteController extends Controller {
             if($request->submit == 'Cancel'){
 
                 $i['iin_id'] = $request->iin_id;
-                $r['iin_id'] = array('required', new ItemIssueNoteCancelValidation('Exist'));
+                $r['iin_id'] = array('required', new ItemIssueNoteCancelValidation('cancel'));
                 $validator = Validator::make($i, $r);
 
             }else{

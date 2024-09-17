@@ -228,7 +228,11 @@ class SiteController extends Controller {
 
         foreach($result->task as $task_key => $task_value){
 
-            $return_text .= " <option value = '". $task_value->task_id ."'>". $task_value->task_name ."</option> ";
+            if( $task_value->active == 1 ){
+
+                $return_text .= " <option value = '". $task_value->task_id ."'>". $task_value->task_name ."</option> ";
+            }
+
         }
         $return_text .= " <option value = '0' selected> Select the Task </option> ";
 

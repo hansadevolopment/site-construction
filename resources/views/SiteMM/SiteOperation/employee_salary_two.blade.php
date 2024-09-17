@@ -197,6 +197,29 @@
                                 </div>
 
                                 <div class="row mb-2">
+                                    <label for="tid" class="col-sm-1 col-form-label-sm">Worked Qty</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" name="worked_quantity" id="worked_quantity" class="form-control form-control-sm text-end" value="{{$ES['attributes']['worked_quantity']}}">
+                                        @if($ES['attributes']['validation_messages']->has('worked_quantity'))
+                                            <script>
+                                                    document.getElementById('worked_quantity').className = 'form-select form-select-sm is-invalid text-end';
+                                            </script>
+                                            <div class="invalid-feedback">{{ $ES['attributes']['validation_messages']->first("worked_quantity") }}</div>
+                                        @endif
+                                    </div>
+                                    <label for="tid" class="col-sm-1 col-form-label-sm">Unit Rate</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" name="unit_rate" id="unit_rate" class="form-control form-control-sm text-end" value="{{$ES['attributes']['unit_rate']}}">
+                                        @if($ES['attributes']['validation_messages']->has('unit_rate'))
+                                            <script>
+                                                    document.getElementById('unit_rate').className = 'form-select form-select-sm is-invalid text-end';
+                                            </script>
+                                            <div class="invalid-feedback">{{ $ES['attributes']['validation_messages']->first("unit_rate") }}</div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2">
                                     <label for="tid" class="col-sm-1 col-form-label-sm">Pay Amount</label>
                                     <div class="col-sm-2">
                                         <input type="text" name="pay_amount" id="pay_amount" class="form-control form-control-sm text-end" value="{{$ES['attributes']['pay_amount']}}">

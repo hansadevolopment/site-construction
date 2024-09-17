@@ -12,10 +12,10 @@ use App\Models\SiteMM\SiteForcast\SiteOverheadCost;
 use App\Models\SiteMM\SiteForcast\SiteProfit;
 
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Support\MessageBag;
-use Illuminate\Support\Carbon;
+
+use App\Rules\ZeroValidation;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -46,9 +46,93 @@ class SapReportController extends Controller {
 
             return $attributes;
         }
+
+        $inputs = $request->input();
+        if(is_null($inputs) == FALSE){
+
+            $attributes['site_id'] = $inputs['site_id'];
+            $attributes['task_id'] = $inputs['task_id'];
+            $attributes['sub_task_id'] = $inputs['sub_task_id'];
+        }
+
+        if( ($process['validation_result'] == TRUE) && ($process['process_status'] == TRUE)){
+
+            $attributes['validation_messages'] = $process['validation_messages'];
+
+            $message = $process['front_end_message'] .' <br> ' . $process['back_end_message'];
+            $attributes['process_message'] = '<div class="alert alert-success" role="alert"> '. $message .' </div> ';
+
+        }else{
+
+            $attributes['validation_messages'] = $process['validation_messages'];
+
+			$message = $process['front_end_message'] .' <br> ' . $process['back_end_message'];
+            $attributes['process_message'] = '<div class="alert alert-danger" role="alert"> '. $message .' </div> ';
+        }
+
+        return $attributes;
     }
 
+
     public function sapReport(Request $request){
+
+        $site_validation_result = $this->validateReport($request);
+        if($site_validation_result['validation_result'] == TRUE){
+
+           $this->prepareBudgetReport($request);
+
+        }else{
+
+            $site_validation_result['process_status'] = FALSE;
+
+            $data['site'] = Site::where('active', 1)->get();
+            $data['site_task'] = array();
+            $data['site_sub_task'] = array();
+            $data['attributes'] = $this->getSapReportAttributes($site_validation_result, $request);
+
+            return view('SiteMM.Report.sap_report')->with('SAPR', $data);
+        }
+
+    }
+
+
+    private function validateReport($request){
+
+        //try{
+
+            $inputs['site_id'] = $request->site_id;
+
+            $rules['site_id'] = array( new ZeroValidation('Site', $request->site_id));
+
+
+            $front_end_message = '';
+
+            $validator = Validator::make($inputs, $rules);
+            $validation_result = $validator->passes();
+            if($validation_result == FALSE){
+
+                $front_end_message = 'Please Check Your Inputs';
+            }
+
+            $process_result['validation_result'] = $validator->passes();
+            $process_result['validation_messages'] =  $validator->errors();
+            $process_result['front_end_message'] = $front_end_message;
+            $process_result['back_end_message'] =  'Site Controller - Validation Process ';
+
+            return $process_result;
+
+        // }catch(\Exception $e){
+
+        //     $process_result['validation_result'] = FALSE;
+        //     $process_result['validation_messages'] = new MessageBag();
+        //     $process_result['front_end_message'] =  $e->getMessage();
+        //     $process_result['back_end_message'] =  'Site Controller - Validation Function Fault';
+
+		// 	return $process_result;
+        // }
+    }
+
+    public function prepareBudgetReport($request){
 
         $site_id = $request->site_id;
         $task_id = 0;
@@ -392,5 +476,8 @@ class SapReportController extends Controller {
         $writer->save('php://output'); // download file
 
     }
+
+
+
 
 }

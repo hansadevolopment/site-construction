@@ -24,6 +24,7 @@
                         </div>
 
                         <div class="row no-gutters">
+                            
                             <div class="col-12 col-sm-8 col-md-8">
 
                                 <div class="row mb-2">

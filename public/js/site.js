@@ -287,6 +287,9 @@ $(document).ready(function() {
         var dpr_item_id = $('.dpr-item');
         if( cs_id == 1 ){
 
+            $("#dpr_none_quantity").show();
+            $("#btn_save").hide();
+            $("#dpr_quantity").hide();
             jQuery(dpr_item_id).attr("id","item_id");
 
             $.ajax({
@@ -308,6 +311,9 @@ $(document).ready(function() {
 
         }else if( cs_id == 3 ){
 
+            $("#dpr_none_quantity").show();
+            $("#btn_save").hide();
+            $("#dpr_quantity").hide();
             $('.dpr-item').attr("id","overhead_cost_item_id");
 
             $.ajax({
@@ -326,6 +332,12 @@ $(document).ready(function() {
                     $('#overhead_cost_item_id').html(response);
                 }
             });
+
+        }else if( cs_id == 5 ){
+
+            $("#dpr_none_quantity").hide();
+            $("#btn_save").show();
+            $("#dpr_quantity").show();
 
         }
 
@@ -502,6 +514,29 @@ $(window).on( "load", function() {
         $("#sap_labour_basic_salary").hide();
         $("#sap_labour_sub_target").show();
     }
+
+
+    var cs_id = $(".dpr-cs-id").val();
+    if( cs_id == 1 ){
+
+        $("#dpr_none_quantity").show();
+        $("#btn_save").hide();
+        $("#dpr_quantity").hide();
+
+    }else if( cs_id == 3 ){
+
+        $("#dpr_none_quantity").show();
+        $("#btn_save").hide();
+        $("#dpr_quantity").hide();
+
+    }else if( cs_id == 5 ){
+
+        $("#dpr_none_quantity").hide();
+        $("#btn_save").show();
+        $("#dpr_quantity").show();
+
+    }
+
 
 });
 

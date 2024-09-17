@@ -102,6 +102,43 @@
                                 </div>
 
                                 <div class="row mb-2">
+                                    <label for="tid" class="col-sm-2 col-form-label-sm">Unit</label>
+                                    <div class="col-sm-10">
+                                        <select name="unit_id" id="unit_id" class="form-select form-select-sm" >
+                                            @foreach($SubSite['unit'] as $row)
+                                                @if($SubSite['attributes']['unit_id'] == $row->unit_id)
+                                                    <option value ="{{$row->unit_id}}" selected>{{$row->unit_name}}</option>
+                                                @else
+                                                    <option value ="{{$row->unit_id}}">{{$row->unit_name}}</option>
+                                                @endif
+                                            @endforeach
+                                            @if($SubSite['attributes']['unit_id'] == "0")
+                                                <option value ="0" selected>Select the Unit </option>
+                                            @endif
+                                        </select>
+                                        @if($SubSite['attributes']['validation_messages']->has('unit_id'))
+                                            <script>
+                                                    document.getElementById('unit_id').className = 'form-control form-control-sm is-invalid';
+                                            </script>
+                                            <div class="invalid-feedback">{{ $SubSite['attributes']['validation_messages']->first("unit_id") }}</div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2">
+                                    <label for="tid" class="col-sm-2 col-form-label-sm">Quantity</label>
+                                    <div class="col-sm-4">
+                                        <input type="text" name="quantity" id="quantity" class="form-control form-control-sm text-end"  value="{{$SubSite['attributes']['quantity']}}">
+                                        @if($SubSite['attributes']['validation_messages']->has('quantity'))
+                                            <script>
+                                                    document.getElementById('quantity').className = 'form-control form-control-sm is-invalid text-end';
+                                            </script>
+                                            <div class="invalid-feedback">{{ $SubSite['attributes']['validation_messages']->first("quantity") }}</div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2">
                                     <label for="tid" class="col-sm-2 col-form-label-sm">Start Date</label>
                                     <div class="col-sm-4">
                                         <input type="date" name="start_date" id="start_date" class="form-control form-control-sm"  value="{{$SubSite['attributes']['start_date']}}">

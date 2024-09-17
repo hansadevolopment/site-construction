@@ -10,36 +10,23 @@ class CurrencyValidation implements Rule {
     protected $avoid_zero_validation = NULL;
 
     public function __construct($para_value){
-        
+
         $this->avoid_zero_validation = $para_value;
     }
 
     public function passes($attribute, $value){
 
         $currency_value = str_replace(",","",$value);
-        
-        if(is_numeric($currency_value)){
 
-            if($this->avoid_zero_validation == 0){
+        if( (preg_match('/^\d+(\.\d{1,2})?$/', $currency_value)) && ($currency_value != 0)){
 
-                if($currency_value > 0){
+            return TRUE;
 
-                    return TRUE;
-    
-                }else{
-    
-                    $this->message = 'The Amount must be grater than zero value.';
-                    return FALSE;
-                }
-            }
+        }else{
 
-			return TRUE;
-
-		}else{
-
-			$this->message = 'The Amount must be Numeric';
-			return FALSE;
-		}
+            $this->message = 'Please enter valid amounts';
+            return FALSE;
+        }
     }
 
     public function message(){

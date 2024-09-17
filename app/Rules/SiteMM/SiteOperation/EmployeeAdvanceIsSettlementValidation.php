@@ -16,7 +16,7 @@ class EmployeeAdvanceIsSettlementValidation implements Rule {
     public function passes($attribute, $value) {
 
         $result = DB::table('employee_advance')->where('ea_id', $value)->value('settle');
-        if( EloquentHelper::recordExists($result) ){
+        if( $result ){
 
             return TRUE;
         }else{

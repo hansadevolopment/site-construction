@@ -15,7 +15,6 @@ use App\Http\Controllers\SiteMM\SiteOperation\EmployeeSalaryController;
 
 use App\Models\SiteMM\SiteOperation\EmployeeSalary;
 use App\Models\SiteMM\SiteOperation\EmployeeSalaryDetail;
-
 use App\Traits\Validations\InputValidateTrait;
 
 use Illuminate\Support\Facades\Validator;
@@ -27,6 +26,7 @@ use \stdClass;
 
 use App\Rules\ZeroValidation;
 use App\Rules\CurrencyValidation;
+use App\Rules\QuantityValidation;
 use App\Rules\SiteMM\SiteOperation\EmployeeSalaryIsUpdateValidation;
 
 class EmployeeSalaryTwoController extends Controller {
@@ -36,8 +36,6 @@ class EmployeeSalaryTwoController extends Controller {
     public function loadView(){
 
         $objEmployeeSalaryController =  new EmployeeSalaryController();
-        $objEmployeeAdvanceController = new EmployeeAdvanceController();
-        //$advance_result = $objEmployeeAdvanceController->getEmployeeSalaryAdvanceRecordsForBasicSalary($request->employee_id);
 
         $data['site'] = Site::where('active', 1)->get();
         $data['site_task'] = array();
@@ -59,6 +57,8 @@ class EmployeeSalaryTwoController extends Controller {
         $attributes['site_id'] = '0';
         $attributes['task_id'] = '0';
         $attributes['sub_task_id'] = '0';
+        $attributes['worked_quantity'] = '0';
+        $attributes['unit_rate'] = '0';
         $attributes['pay_amount'] = '0';
         $attributes['advance_amount'] = '0';
         $attributes['remark'] = '';
@@ -88,8 +88,15 @@ class EmployeeSalaryTwoController extends Controller {
                 $attributes['advance_amount'] = number_format($elqES->net_salary, 2);
                 $attributes['remark'] = $elqES->remark;
             }
-            $attributes['validation_messages'] = $process['validation_messages'];
 
+            $elqESDetail = EmployeeSalaryDetail::where('es_id', $process['es_id'])->get();
+            foreach($elqESDetail as $key => $value){
+
+                $attributes['worked_quantity'] = $value->worked_quantity;
+                $attributes['unit_rate'] =$value->working_rate;
+            }
+
+            $attributes['validation_messages'] = $process['validation_messages'];
             if($request->submit == 'Display'){
 
                 $attributes['validation_messages'] = new MessageBag();
@@ -112,6 +119,8 @@ class EmployeeSalaryTwoController extends Controller {
                 $attributes['site_id'] = $inputs['site_id'];
                 $attributes['task_id'] = $inputs['task_id'];
                 $attributes['sub_task_id'] = $inputs['sub_task_id'];
+                $attributes['worked_quantity'] = $inputs['worked_quantity'];
+                $attributes['unit_rate'] = $inputs['unit_rate'];
                 $attributes['pay_amount'] = $inputs['pay_amount'];
                 $attributes['advance_amount'] = 0;
                 $attributes['remark'] =$inputs['remark'];
@@ -175,6 +184,8 @@ class EmployeeSalaryTwoController extends Controller {
             $inputs['site_id'] = $request->site_id;
             $inputs['task_id'] = $request->task_id;
             $inputs['sub_task_id'] = $request->sub_task_id;
+            $inputs['worked_quantity'] = $request->worked_quantity;
+            $inputs['unit_rate'] = floatval(str_replace(',', '',$request->unit_rate));
             $inputs['pay_amount'] = floatval(str_replace(',', '',$request->pay_amount));
             $inputs['remark'] = $request->remark;
 
@@ -185,6 +196,8 @@ class EmployeeSalaryTwoController extends Controller {
             $rules['site_id'] = array( new ZeroValidation('Site', $request->site_id));
             $rules['task_id'] = array( new ZeroValidation('Task', $request->task_id));
             $rules['sub_task_id'] = array( new ZeroValidation('Sub Task', $request->sub_task_id));
+            $rules['worked_quantity'] = array('required', 'numeric', new QuantityValidation(1));
+            $rules['unit_rate'] = array('required', 'numeric', new CurrencyValidation(0));
             $rules['pay_amount'] = array('required', 'numeric', new CurrencyValidation(1));
             $rules['remark'] = array('max:100');
 
@@ -292,9 +305,10 @@ class EmployeeSalaryTwoController extends Controller {
             $employee_salary_detail[$x]['task_id'] = $request->task_id;
             $employee_salary_detail[$x]['sub_task_id'] = $request->sub_task_id;
 
+            $employee_salary_detail[$x]['worked_quantity'] = $request->worked_quantity;
             $employee_salary_detail[$x]['working_hours'] = 0;
-            $employee_salary_detail[$x]['working_rate'] = 0;
-            $employee_salary_detail[$x]['working_amount'] = floatval(str_replace(',', '',$request->pay_amount));
+            $employee_salary_detail[$x]['working_rate'] = floatval(str_replace(',', '', $request->unit_rate));;
+            $employee_salary_detail[$x]['working_amount'] = floatval(str_replace(',', '', $request->pay_amount));
 
             $employee_salary_detail[$x]['ot_hours'] = 0;
             $employee_salary_detail[$x]['ot_rate'] = 0;

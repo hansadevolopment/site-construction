@@ -1,0 +1,12 @@
+<?php
+
+namespace App\Http\Controllers\Purchasing\ListInquire;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+class PurchasingTransactionListInquireController extends Controller {
+
+    
+
+}
